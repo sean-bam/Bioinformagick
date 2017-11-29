@@ -1,0 +1,2 @@
+# Bioinformagick
+Scripts for bioinformagicking
