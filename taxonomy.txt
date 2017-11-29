@@ -1,0 +1,171 @@
+ProphageID	Phylum	Class	Order	Family	Genus	Species	strain	NCBItaxonomyID
+g.1032.pp.1	Proteobacteria;	Gammaproteobacteria;	Alteromonadales;	Shewanellaceae;	Shewanella		W3-18-1	351745
+g.1144.pp.4	Proteobacteria;	Deltaproteobacteria;	Myxococcales;	Archangiaceae;	Stigmatella;	Stigmatellaaurantiaca	DW4/3-1	378806
+g.1207.pp.8	Proteobacteria;	Gammaproteobacteria;	Xanthomonadales;	Xanthomonadaceae;	Stenotrophomonas		SKA14	391601
+g.1257.pp.4	Proteobacteria;	Betaproteobacteria;	Burkholderiales;	Leptothrix;	Leptothrixcholodnii		SP-6	395495
+g.1293.pp.2	Proteobacteria;	Gammaproteobacteria;	Legionellales;	Legionellaceae;	Legionella;	Legionellapneumophila	str.Corby	400673
+g.1302.pp.2	Proteobacteria;	Betaproteobacteria;	Burkholderiales;	Burkholderiaceae;	Ralstonia;	Ralstoniapickettii	12J	402626
+g.1343.pp.3	Proteobacteria;	Gammaproteobacteria;	Enterobacterales;	Morganellaceae;	Xenorhabdus;	Xenorhabdusbovienii	SS-2004	406818
+g.1354.pp.3	Firmicutes;	Clostridia;	Clostridiales;	Lachnospiraceae;	Blautia;	Blautiaobeum	ATCC29174	411459
+g.1363.pp.1	Firmicutes;	Clostridia;	Clostridiales;	Lachnospiraceae;	Lachnoclostridium;	[Clostridium]scindens	ATCC35704	411468
+g.1363.pp.4	Firmicutes;	Clostridia;	Clostridiales;	Lachnospiraceae;	Lachnoclostridium;	[Clostridium]scindens	ATCC35704	411468
+g.1365.pp.3	Firmicutes;	Clostridia;	Clostridiales;	Lachnospiraceae;	Blautia;	[Ruminococcus]gnavus	ATCC29149	411470
+g.1368.pp.5	Bacteroidetes;	Bacteroidia;	Bacteroidales;	Bacteroidaceae;	Bacteroides;	Bacteroidesovatus	ATCC8483	411476
+g.1372.pp.5	Firmicutes;	Clostridia;	Clostridiales;	Ruminococcaceae;	Faecalibacterium;	Faecalibacteriumprausnitzii	A2-165	411483
+g.1375.pp.2	Firmicutes;	Clostridia;	Clostridiales;	Clostridiaceae;	Clostridium		M62/1	411486
+g.1380.pp.3	Firmicutes;	Clostridia;	Clostridiales;	Lachnospiraceae;	Lachnoclostridium;	[Clostridium]bolteae	ATCCBAA-613	411902
+g.1381.pp.1	Actinobacteria;	Coriobacteriia;	Coriobacteriales;	Coriobacteriaceae;	Collinsella;	Collinsellaaerofaciens	ATCC25986	411903
+g.1522.pp.3	Bacteroidetes;	Bacteroidia;	Bacteroidales;	Rikenellaceae;	Alistipes;	Alistipesputredinis	DSM17216	445970
+g.1527.pp.1	Actinobacteria;	Coriobacteriia;	Coriobacteriales;	Coriobacteriaceae;	Collinsella;	Collinsellastercoris	DSM13279	445975
+g.1552.pp.2	Bacteroidetes;	Bacteroidia;	Bacteroidales;	Bacteroidaceae;	Bacteroides;	Bacteroidesstercoris	ATCC43183	449673
+g.1599.pp.6	Bacteroidetes;	Bacteroidia;	Bacteroidales;	Bacteroidaceae;	Bacteroides		1130	457387
+g.1601.pp.2	Bacteroidetes;	Bacteroidia;	Bacteroidales;	Bacteroidaceae;	Bacteroides		3123	457390
+g.1602.pp.4	Bacteroidetes;	Bacteroidia;	Bacteroidales;	Bacteroidaceae;	Bacteroides		3133FAA	457391
+g.1606.pp.6	Bacteroidetes;	Bacteroidia;	Bacteroidales;	Bacteroidaceae;	Bacteroides		9142FAA	457395
+g.1613.pp.5	Firmicutes;	Clostridia;	Clostridiales;	Ruminococcaceae;	Ruminococcus		5139BFAA	457412
+g.1615.pp.3	Firmicutes;	Clostridia;	Clostridiales				1747FAA	457421
+g.1616.pp.10	Bacteroidetes;	Bacteroidia;	Bacteroidales;	Bacteroidaceae;	Bacteroides		3112	457424
+g.1616.pp.11	Bacteroidetes;	Bacteroidia;	Bacteroidales;	Bacteroidaceae;	Bacteroides		3112	457424
+g.1648.pp.1	Bacteroidetes;	Bacteroidia;	Bacteroidales;	Bacteroidaceae;	Bacteroides		1114	469585
+g.1648.pp.4	Bacteroidetes;	Bacteroidia;	Bacteroidales;	Bacteroidaceae;	Bacteroides		1114	469585
+g.1649.pp.4	Bacteroidetes;	Bacteroidia;	Bacteroidales;	Bacteroidaceae;	Bacteroides		116	469586
+g.1653.pp.13	Bacteroidetes;	Bacteroidia;	Bacteroidales;	Bacteroidaceae;	Bacteroides		224	469590
+g.1656.pp.9	Bacteroidetes;	Bacteroidia;	Bacteroidales;	Bacteroidaceae;	Bacteroides		3140A	469593
+g.1738.pp.2	Actinobacteria;	Coriobacteriia;	Eggerthellales;	Eggerthellaceae;	Eggerthella;	Eggerthellalenta	DSM2243	479437
+g.1750.pp.2	Bacteroidetes;	Bacteroidia;	Bacteroidales;	Bacteroidaceae;	Bacteroides;	Bacteroidesfinegoldii	DSM17565	483215
+g.1750.pp.6	Bacteroidetes;	Bacteroidia;	Bacteroidales;	Bacteroidaceae;	Bacteroides;	Bacteroidesfinegoldii	DSM17565	483215
+g.1763.pp.12	Firmicutes;	Clostridia;	Clostridiales;	Peptococcaceae;	Desulfotomaculum;	Desulfotomaculumacetoxidans	DSM771	485916
+g.1894.pp.4	Firmicutes;	Clostridia;	Clostridiales;	Lachnospiraceae;	[Eubacterium]rectale		ATCC33656	515619
+g.1894.pp.6	Firmicutes;	Clostridia;	Clostridiales;	Lachnospiraceae;	[Eubacterium]rectale		ATCC33656	515619
+g.1895.pp.2	Firmicutes;	Clostridia;	Clostridiales;	Eubacteriaceae;	Eubacterium;	[Eubacterium]eligens	ATCC27750	515620
+g.1910.pp.5	Firmicutes;	Clostridia;	Clostridiales;	Lachnospiraceae;	Lachnoclostridium;	[Clostridium]asparagiforme	DSM15981	518636
+g.1947.pp.2	Actinobacteria;	Coriobacteriia;	Coriobacteriales;	Coriobacteriaceae;	Collinsella;	Collinsellaintestinalis	DSM13280	521003
+g.1980.pp.1	Firmicutes;	Tissierellia;	Tissierellales;	Peptoniphilaceae;	Anaerococcus;	Anaerococcuslactolyticus	ATCC51172	525254
+g.2060.pp.4	Firmicutes;	Bacilli;	Bacillales;	Bacillaceae;	Bacillus;	Bacilluscereusgroup;	R309803	526968
+g.2141.pp.5	Firmicutes;	Clostridia;	Clostridiales;	Lachnospiraceae;	Roseburia;	Roseburiaintestinalis	L1-82	536231
+g.2234.pp.4	Firmicutes;	Clostridia;	Clostridiales;	Ruminococcaceae			D16	552398
+g.226.pp.8	Cyanobacteria;	Oscillatoriophycideae;	Oscillatoriales;	Microcoleaceae;	Trichodesmium;	Trichodesmiumerythraeum	IMS101	203124
+g.2289.pp.1	Bacteroidetes;	Bacteroidia;	Bacteroidales;	Bacteroidaceae;	Bacteroides		D1	556258
+g.2290.pp.2	Bacteroidetes;	Bacteroidia;	Bacteroidales;	Bacteroidaceae;	Bacteroides		D2	556259
+g.2290.pp.4	Bacteroidetes;	Bacteroidia;	Bacteroidales;	Bacteroidaceae;	Bacteroides		D2	556259
+g.23381.pp.3	Proteobacteria;	Gammaproteobacteria;	Pseudomonadales;	Pseudomonadaceae;	Pseudomonas;	Pseudomonasfluorescensgroup;	A506	1037911
+g.23533.pp.2	Proteobacteria;	Gammaproteobacteria;	Pseudomonadales;	Pseudomonadaceae;	Pseudomonas;	Pseudomonasaeruginosagroup;	213BR	1051004
+g.23534.pp.3	Proteobacteria;	Gammaproteobacteria;	Pseudomonadales;	Pseudomonadaceae;	Pseudomonas;	Pseudomonasaeruginosagroup;	9BR	1051005
+g.23643.pp.2	Proteobacteria;	Betaproteobacteria;	Burkholderiales;	Burkholderiaceae;	Burkholderia;	Burkholderiacepaciacomplex;	H111	1055524
+g.2412.pp.2	Proteobacteria;	Alphaproteobacteria;	Rickettsiales;	Anaplasmataceae;	Wolbachieae;	Wolbachia;	ofCulexquinquefasciatusPel	570417
+g.2418.pp.1	Firmicutes;	Clostridia;	Halanaerobiales;	Halanaerobiaceae;	Halanaerobium;	Halanaerobiumpraevalens	DSM2228	572479
+g.24302.pp.1	Proteobacteria;	Betaproteobacteria;	Burkholderiales;	Oxalobacteraceae;	Janthinobacterium;	Janthinobacteriumlividum	PAMC25724	1112211
+g.24569.pp.1	Proteobacteria;	Gammaproteobacteria;	Vibrionales;	Vibrionaceae;	Vibrio;	Vibriocyclitrophicus	1F273	1136161
+g.24636.pp.3	Proteobacteria;	Gammaproteobacteria;	Pseudomonadales;	Pseudomonadaceae;	Pseudomonas		GM18	1144324
+g.24647.pp.2	Proteobacteria;	Gammaproteobacteria;	Pseudomonadales;	Pseudomonadaceae;	Pseudomonas		GM67	1144335
+g.24656.pp.5	Proteobacteria;	Alphaproteobacteria;	Rhizobiales;	Bradyrhizobiaceae;	Bradyrhizobium		YR681	1144344
+g.2482.pp.2	Proteobacteria;	Betaproteobacteria;	Nitrosomonadales;	Gallionellaceae;	Sideroxydans;	Sideroxydanslithotrophicus	ES-1	580332
+g.2482.pp.4	Proteobacteria;	Betaproteobacteria;	Nitrosomonadales;	Gallionellaceae;	Sideroxydans;	Sideroxydanslithotrophicus	ES-1	580332
+g.25008.pp.2	Proteobacteria;	Gammaproteobacteria;	Xanthomonadales;	Rhodanobacteraceae;	Rhodanobacter;	Rhodanobacterthiooxydans	LCS2	1163409
+g.25178.pp.2	Proteobacteria;	Gammaproteobacteria;	Pseudomonadales;	Pseudomonadaceae;	Pseudomonas		M47T1	1179778
+g.2542.pp.7	Bacteroidetes;	Bacteroidia;	Bacteroidales;	Bacteroidaceae;	Bacteroides		D22	585544
+g.25458.pp.1	Bacteroidetes;	Sphingobacteriia;	Sphingobacteriales;	Sphingobacteriaceae;	Pedobacter;	Pedobacterarcticus	A12	1206103
+g.2615.pp.2	Tenericutes;	Mollicutes;	Acholeplasmatales;	Acholeplasmataceae;	CandidatusPhytoplasma;	16SrXII(Stolburgroup)	australiense	59748
+g.26274.pp.7	Firmicutes;	Clostridia;	Clostridiales;	Clostridiaceae;	Alkaliphilus;	Alkaliphilusmetalliredigens	QYMF	293826
+g.2640.pp.3	Firmicutes;	Bacilli;	Bacillales;	Paenibacillaceae;	Paenibacillus;	Paenibacillussp.oraltaxon786	D14	621372
+g.26473.pp.3	Proteobacteria;	Alphaproteobacteria;	Rhodobacterales;	Rhodobacteraceae;	Rhodobacter;	Rhodobactersphaeroides	ATCC17025	349102
+g.2650.pp.3	Proteobacteria;	Betaproteobacteria;	Burkholderiales;	Burkholderiaceae;	Burkholderia;	Burkholderiaglumae	BGR1	626418
+g.26528.pp.6	Cyanobacteria;	Nostocales;	Rivulariaceae;	Rivularia			PCC7116	373994
+g.26742.pp.5	Fusobacteria;	Fusobacteriia;	Fusobacteriales;	Fusobacteriaceae;	Fusobacterium;	Fusobacteriumulcerans	121B	457404
+g.26919.pp.1	Bacteroidetes;	Flavobacteriia;	Flavobacteriales;	Flavobacteriaceae;	Galbibacter		ck-I2-15	555500
+g.26931.pp.6	Cyanobacteria;	Oscillatoriophycideae;	Oscillatoriales;	Oscillatoriaceae;	Oscillatoria;	Oscillatoriaacuminata	PCC6304	56110
+g.26941.pp.2	Bacteroidetes;	Bacteroidia;	Bacteroidales;	Prevotellaceae;	Prevotella		C561	563031
+g.27016.pp.1	Proteobacteria;	delta/epsilonsubdivisions;	Deltaproteobacteria;	Desulfovibrionales;	Desulfovibrionaceae;	Desulfovibrio	U5L	596152
+g.27080.pp.5	Proteobacteria;	delta/epsilonsubdivisions;	Deltaproteobacteria;	Desulfobacterales;	Desulfobacteraceae;	Desulfobacula;	Tol2	651182
+g.27080.pp.7	Proteobacteria;	delta/epsilonsubdivisions;	Deltaproteobacteria;	Desulfobacterales;	Desulfobacteraceae;	Desulfobacula;	Tol2	651182
+g.27096.pp.1	Firmicutes;	Clostridia;	Clostridiales;	Lachnospiraceae			7158FAA	658087
+g.27096.pp.15	Firmicutes;	Clostridia;	Clostridiales;	Lachnospiraceae			7158FAA	658087
+g.27096.pp.3	Firmicutes;	Clostridia;	Clostridiales;	Lachnospiraceae			7158FAA	658087
+g.27096.pp.7	Firmicutes;	Clostridia;	Clostridiales;	Lachnospiraceae			7158FAA	658087
+g.27099.pp.2	Bacteroidetes;	Bacteroidia;	Bacteroidales;	Tannerellaceae;	Parabacteroides		D25	658661
+g.27128.pp.1	Firmicutes;	Clostridia;	Clostridiales;	Clostridiaceae;	Clostridium		7354FAA	665940
+g.27128.pp.10	Firmicutes;	Clostridia;	Clostridiales;	Clostridiaceae;	Clostridium		7354FAA	665940
+g.27137.pp.4	Firmicutes;	Clostridia;	Clostridiales;	Ruminococcaceae;	Subdoligranulum		4354A2FAA	665956
+g.27343.pp.3	Bacteroidetes;	Bacteroidia;	Bacteroidales;	Rikenellaceae;	Alistipes;	Alistipesfinegoldii	DSM17242	679935
+g.27474.pp.2	Bacteroidetes;	Bacteroidia;	Bacteroidales;	Bacteroidaceae;	Bacteroides;	Bacteroidesoleiciplenus	YIT12058	742727
+g.27478.pp.3	Firmicutes;	Clostridia;	Clostridiales;	Lachnospiraceae;	Lachnoclostridium;	[Clostridium]clostridioforme	2149FAA	742735
+g.27505.pp.2	Proteobacteria;	Betaproteobacteria;	Neisseriales;	Chromobacteriaceae;	Pseudogulbenkiania		NH8B	748280
+g.27535.pp.5	Proteobacteria;	Gammaproteobacteria;	Enterobacterales;	Enterobacteriaceae;	Escherichia;	Escherichiacoli	G58-1	754078
+g.2764.pp.3	Proteobacteria;	Alphaproteobacteria;	Rhizobiales;	Hyphomicrobiaceae;	Rhodomicrobium;	Rhodomicrobiumvannielii	ATCC17100	648757
+g.27954.pp.1	Proteobacteria;	Gammaproteobacteria;	Enterobacterales;	Enterobacteriaceae;	Escherichia;	Escherichiacoli	B41	869694
+g.27983.pp.1	Bacteroidetes;	Cytophagia;	Cytophagales;	Bernardetiaceae;	Bernardetia;	Bernardetialitoralis	DSM6794	880071
+g.2820.pp.2	Bacteroidetes;	Bacteroidia;	Bacteroidales;	Bacteroidaceae;	Bacteroides;	Bacteroidesxylanisolvens	XB1A	657309
+g.2827.pp.4	Firmicutes;	Clostridia;	Clostridiales;	Lachnospiraceae;	[Eubacterium]rectale		DSM17629	657318
+g.2827.pp.9	Firmicutes;	Clostridia;	Clostridiales;	Lachnospiraceae;	[Eubacterium]rectale		DSM17629	657318
+g.2830.pp.9	Firmicutes;	Clostridia;	Clostridiales;	Ruminococcaceae;	Faecalibacterium;	Faecalibacteriumprausnitzii	SL3/3	657322
+g.2831.pp.4	Firmicutes;	Clostridia;	Clostridiales;	Ruminococcaceae;	Ruminococcus		SR1/5	657323
+g.28311.pp.1	Firmicutes;	Negativicutes;	Veillonellales;	Veillonellaceae;	Megasphaera			907
+g.2839.pp.2	Firmicutes;	Clostridia;	Clostridiales;	Lachnospiraceae			5163FAA	658089
+g.2844.pp.4	Firmicutes;	Clostridia;	Clostridiales;	Lachnospiraceae			1456FAA	658655
+g.28509.pp.2	Proteobacteria;	Gammaproteobacteria;	Pseudomonadales;	Pseudomonadaceae;	Pseudomonas		M1	95619
+g.2867.pp.3	Bacteroidetes;	Bacteroidia;	Bacteroidales;	Bacteroidaceae;	Bacteroides		2156FAA	665938
+g.28684.pp.1	Proteobacteria;	Gammaproteobacteria;	Vibrionales;	Vibrionaceae;	Vibrio;	Vibriocholerae	HE-09	991998
+g.28908.pp.3	Bacteroidetes;	Bacteroidia;	Bacteroidales;	Bacteroidaceae;	Bacteroides;	Bacteroidescellulosilyticus	CL02T12C19	997874
+g.28909.pp.6	Bacteroidetes;	Bacteroidia;	Bacteroidales;	Bacteroidaceae;	Bacteroides;	Bacteroidesdorei	CL02T00C15	997875
+g.28910.pp.10	Bacteroidetes;	Bacteroidia;	Bacteroidales;	Bacteroidaceae;	Bacteroides;	Bacteroidesdorei	CL02T12C06	997876
+g.28916.pp.7	Bacteroidetes;	Bacteroidia;	Bacteroidales;	Bacteroidaceae;	Bacteroides;	Bacteroidesfragilis	CL07T00C01	997882
+g.28917.pp.2	Bacteroidetes;	Bacteroidia;	Bacteroidales;	Bacteroidaceae;	Bacteroides;	Bacteroidesfragilis	CL07T12C05	997883
+g.28919.pp.10	Bacteroidetes;	Bacteroidia;	Bacteroidales;	Bacteroidaceae;	Bacteroides;	Bacteroidesovatus	CL02T12C04	997885
+g.28919.pp.8	Bacteroidetes;	Bacteroidia;	Bacteroidales;	Bacteroidaceae;	Bacteroides;	Bacteroidesovatus	CL02T12C04	997885
+g.28920.pp.6	Bacteroidetes;	Bacteroidia;	Bacteroidales;	Bacteroidaceae;	Bacteroides;	Bacteroidesovatus	CL03T12C18	997886
+g.28920.pp.7	Bacteroidetes;	Bacteroidia;	Bacteroidales;	Bacteroidaceae;	Bacteroides;	Bacteroidesovatus	CL03T12C18	997886
+g.28922.pp.3	Bacteroidetes;	Bacteroidia;	Bacteroidales;	Bacteroidaceae;	Bacteroides;	Bacteroidesthetaiotaomicron	CL09T03C10	997888
+g.28922.pp.9	Bacteroidetes;	Bacteroidia;	Bacteroidales;	Bacteroidaceae;	Bacteroides;	Bacteroidesthetaiotaomicron	CL09T03C10	997888
+g.28923.pp.1	Bacteroidetes;	Bacteroidia;	Bacteroidales;	Bacteroidaceae;	Bacteroides;	Bacteroidesuniformis	CL03T00C23	997889
+g.28925.pp.2	Bacteroidetes;	Bacteroidia;	Bacteroidales;	Bacteroidaceae;	Bacteroides;	Bacteroidesvulgatus	CL09T03C04	997891
+g.28927.pp.3	Proteobacteria;	Gammaproteobacteria;	Oceanospirillales;	Halomonadaceae;	Halomonas		TD01	999141
+g.28933.pp.1	Bacteroidetes;	Bacteroidia;	Bacteroidales;	Tannerellaceae;	Parabacteroides;	Parabacteroidesmerdae	CL03T12C32	999420
+g.29562.pp.7	Bacteroidetes;	Bacteroidia;	Bacteroidales;	Bacteroidaceae;	Bacteroides;	Bacteroidessalyersiae	WAL10018	1121101
+g.29595.pp.3	Firmicutes;	Clostridia;	Clostridiales;	Peptococcaceae;	Desulfurispora;	Desulfurisporathermophila	DSM16022	1121472
+g.3007.pp.10	Cyanobacteria;	Oscillatoriophycideae;	Oscillatoriales;	Microcoleaceae;	Arthrospira;	Arthrospiraplatensis	NIES-39	696747
+g.3007.pp.12	Cyanobacteria;	Oscillatoriophycideae;	Oscillatoriales;	Microcoleaceae;	Arthrospira;	Arthrospiraplatensis	NIES-39	696747
+g.3007.pp.3	Cyanobacteria;	Oscillatoriophycideae;	Oscillatoriales;	Microcoleaceae;	Arthrospira;	Arthrospiraplatensis	NIES-39	696747
+g.3007.pp.8	Cyanobacteria;	Oscillatoriophycideae;	Oscillatoriales;	Microcoleaceae;	Arthrospira;	Arthrospiraplatensis	NIES-39	696747
+g.3043.pp.2	Bacteroidetes;	Bacteroidia;	Bacteroidales;	Bacteroidaceae;	Bacteroides;	Bacteroidesvulgatus	PC510	702446
+g.30632.pp.1	Proteobacteria;	Gammaproteobacteria;	Pseudomonadales;	Pseudomonadaceae;	Pseudomonas		CBZ-4	1163065
+g.3070.pp.2	Bacteroidetes;	Bacteroidia;	Bacteroidales;	Odoribacteraceae;	Odoribacter;	Odoribactersplanchnicus	DSM20712	709991
+g.3088.pp.2	Firmicutes;	Bacilli;	Bacillales;	Paenibacillaceae;	Paenibacillus;	Paenibacillusvortex	V453	715225
+g.3099.pp.1	Bacteroidetes;	Bacteroidia;	Bacteroidales;	Rikenellaceae;	Alistipes;	Alistipesshahii	WAL8301	717959
+g.3102.pp.5	Firmicutes;	Clostridia;	Clostridiales;	Lachnospiraceae;	Coprococcus;	Coprococcuscatus	GD/7	717962
+g.3105.pp.8	Firmicutes;	Clostridia;	Clostridiales;	Ruminococcaceae;	Faecalibacterium;	Faecalibacteriumprausnitzii	L2-6	718252
+g.31087.pp.3	Actinobacteria;	Actinobacteria;	Bifidobacteriales;	Bifidobacteriaceae;	Bifidobacterium;	Bifidobacteriumbreve	HPH0326	1203540
+g.31101.pp.1	Firmicutes;	Clostridia;	Clostridiales;	Clostridiaceae;	Butyricicoccus;	Butyricicoccuspullicaecorum	1.2	1203606
+g.31227.pp.3	Proteobacteria;	Gammaproteobacteria;	Pseudomonadales;	Moraxellaceae;	Acinetobacter		NIPH899	1217710
+g.3125.pp.4	Firmicutes;	Clostridia;	Clostridiales;	Lachnospiraceae;	Lachnoclostridium;	[Clostridium]symbiosum	WAL-14163	742740
+g.3126.pp.4	Firmicutes;	Clostridia;	Clostridiales;	Lachnospiraceae;	Lachnoclostridium;	[Clostridium]symbiosum	WAL-14673	742741
+g.31348.pp.2	Bacteroidetes;	Bacteroidia;	Bacteroidales;	Bacteroidaceae;	Bacteroides;	Bacteroidesthetaiotaomicron	dnLKV9	1235785
+g.31350.pp.5	Bacteroidetes;	Bacteroidia;	Bacteroidales;	Bacteroidaceae;	Bacteroides;	Bacteroidesuniformis	dnLKV2	1235787
+g.31350.pp.6	Bacteroidetes;	Bacteroidia;	Bacteroidales;	Bacteroidaceae;	Bacteroides;	Bacteroidesuniformis	dnLKV2	1235787
+g.31351.pp.4	Bacteroidetes;	Bacteroidia;	Bacteroidales;	Bacteroidaceae;	Bacteroides;	Bacteroidessartorii	dnLKV3	1235788
+g.31354.pp.6	Actinobacteria;	Coriobacteriia;	Eggerthellales;	Eggerthellaceae;	Enterorhabdus;	Enterorhabduscaecimuris	B7	1235794
+g.31357.pp.5	Firmicutes;	Clostridia;	Clostridiales;	Oscillospiraceae;	Oscillibacter		42738	1235797
+g.31410.pp.3	Proteobacteria;	Alphaproteobacteria;	Rhodospirillales;	Rhodospirillaceae;	Magnetospirillum		SO-1	1244869
+g.3151.pp.2	Proteobacteria;	Gammaproteobacteria;	Pseudomonadales;	Pseudomonadaceae;	Pseudomonas;	Pseudomonasfluorescensgroup;	WH6	746360
+g.31515.pp.2	Proteobacteria;	Betaproteobacteria;	Rhodocyclales;	Zoogloeaceae;	Azoarcus;	Azoarcustoluclasticus	ATCC700605	1261621
+g.31540.pp.1	Proteobacteria;	Betaproteobacteria;	Burkholderiales;	Comamonadaceae;	Curvibacter;	Curvibacterlanceolatus	ATCC14669	1265504
+g.31624.pp.2	Proteobacteria;	Gammaproteobacteria;	Chromatiales;	Ectothiorhodospiraceae;	Thioalkalivibrio		ALMg9	1266912
+g.31758.pp.2	Proteobacteria;	Betaproteobacteria;	Burkholderiales;	Burkholderiaceae;	Pandoraea		SD6-2	1286093
+g.31903.pp.2	Proteobacteria;	Gammaproteobacteria;	Pseudomonadales;	Pseudomonadaceae;	Pseudomonas;	Pseudomonasfluorescensgroup;	1YdBTEX2	1295141
+g.32274.pp.1	Firmicutes;	Bacilli;	Bacillales;	Bacillaceae;	Anoxybacillus		DT3-1	690871
+g.32364.pp.2	Proteobacteria;	Betaproteobacteria;	Burkholderiales;	Burkholderiaceae;	Ralstonia;	Ralstoniasolanacearum	CMR15	859655
+g.32458.pp.11	Firmicutes;	Clostridia;	Clostridiales;	Lachnospiraceae;	Lachnoclostridium;	[Clostridium]clostridioforme	90A1	999403
+g.32460.pp.7	Firmicutes;	Clostridia;	Clostridiales;	Lachnospiraceae;	Lachnoclostridium;	[Clostridium]clostridioforme	90A4	999405
+g.32467.pp.6	Firmicutes;	Clostridia;	Clostridiales;	Clostridiaceae;	Hungatella;	Hungatellahathewayi	12489931	999412
+g.3257.pp.2	Firmicutes;	Clostridia;	Clostridiales;	Peptococcaceae;	Desulfotomaculum;	Desulfotomaculumkuznetsovii	DSM6115	760568
+g.3399.pp.3	Proteobacteria;	Gammaproteobacteria					HdN1	83406
+g.3439.pp.4	Bacteroidetes;	Bacteroidia;	Bacteroidales;	Bacteroidaceae;	Bacteroides;	Bacteroidesfragilis	638R	862962
+g.345.pp.1	Actinobacteria;	Actinobacteria;	Bifidobacteriales;	Bifidobacteriaceae;	Bifidobacterium;	Bifidobacteriumlongum	DJO10A	205913
+g.436.pp.7	Bacteroidetes;	Bacteroidia;	Bacteroidales;	Bacteroidaceae;	Bacteroides;	Bacteroidesthetaiotaomicron	VPI-5482	226186
+g.488.pp.2	Proteobacteria;	Gammaproteobacteria;	Enterobacterales;	Morganellaceae;	Photorhabdus;	Photorhabdusluminescens;	subsp.laumondiiTTO1	243265
+g.530.pp.1	Proteobacteria;	Gammaproteobacteria;	Pseudomonadales;	Moraxellaceae;	Psychrobacter;	Psychrobacterarcticus	273-4	259536
+g.680.pp.4	Chlorobi;	Chlorobia;	Chlorobiales;	Chlorobiaceae;	Chlorobium;	Chlorobiumphaeobacteroides	DSM266	290317
+g.72.pp.2	Firmicutes;	Bacilli;	Bacillales;	Paenibacillaceae;	Paenibacillus;	Paenibacillusmucilaginosus	KNP414	1036673
+g.86.pp.1	Proteobacteria;	Gammaproteobacteria;	Pseudomonadales;	Pseudomonadaceae;	Pseudomonas;	Pseudomonasfluorescensgroup;	HK44	1042209
+g.963.pp.2	Proteobacteria;	Alphaproteobacteria;	Rhodospirillales;	Rhodospirillaceae;	Magnetospirillum;	Magnetospirillummagneticum	AMB-1	342108
+g.963.pp.4	Proteobacteria;	Alphaproteobacteria;	Rhodospirillales;	Rhodospirillaceae;	Magnetospirillum;	Magnetospirillummagneticum	AMB-1	342108
+g.996.pp.5	Firmicutes;	Clostridia;	Clostridiales;	Peptococcaceae;	Desulfotomaculum;	Desulfotomaculumreducens	MI-1	349161
