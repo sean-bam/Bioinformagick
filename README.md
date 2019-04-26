@@ -45,6 +45,14 @@ awk ’$5 == ""’ file
  
 ## Random Linux stuff
 
+Read in variables as an array
+```
+#!/bin/bash
+while IFS=$'\t' read -r -a myArray
+do
+        echo "${myArray[0]}" "${myArray[1]}" "${myArray[2]}"
+done < "fileIn.txt"
+```
 move a list of files
 >cat list.txt | xargs mv -t /path/to/folder
 
