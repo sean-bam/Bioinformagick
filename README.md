@@ -5,6 +5,7 @@ Scripts for bioinformagicking
 
 1. [BASH](#bash)
 2. [Random Linux stuff](#Linux)
+3. [E-utilities](#E-utilities)
 
 
 ...
@@ -41,9 +42,7 @@ or
 #Print lines where field $5 is empty
 awk ’$5 == ""’ file
 
-
- 
-## Random Linux stuff
+# <a name="linux">Linux</a>
 
 Read in variables as an array
 ```
@@ -103,3 +102,7 @@ remove lines 1-13 in a file using sed, and create a backup
 Add "WP_" to the beginning of every new line
 >sed -i -e 's/^/WP_/' fileIN.txt
 
+# <a name="E-utilities)">E-utilities)</a>
+
+Get the coordinates of a domain annotated in the `Protein` database record
+>efetch -db protein -id WP_025069012.1 -format gpc | xtract -insd Region region_name INSDInterval_from INSDInterval_to
