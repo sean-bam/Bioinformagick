@@ -6,6 +6,7 @@ Scripts for bioinformagicking
 1. [BASH](#bash)
 2. [Random Linux stuff](#Linux)
 3. [E-utilities](#E-utilities)
+4. [Biowulf](#Biowulf)
 
 
 ...
@@ -25,21 +26,21 @@ Find things in field 6 that match the string "Nov". For matching lines, add fiel
 Find things in Field 1 that have `J`. Replacing `~` with `!~` would do the opposite (things that don't have `J`). 
 >awk ’$1 ~ /J/’ inventory-shipped file
 
-#remove duplicate lines
+remove duplicate lines
 awk '!seen[$0]++' filename.txt
 
-#Search for a thing in tab-delimited column 2, return column 3
+Search for a thing in tab-delimited column 2, return column 3
 awk -F "\t" '$2==Refseq' {print $3}
 
-#Extract field 2 with tab separator
+Extract field 2 with tab separator
 >awk ’BEGIN { FS = "\t" } ; { print $2 }’ file
 or
 >awk -F"\t" '{print $2}' file
 
-#Change output to tab delimited 
+Change output to tab delimited 
 >awk 'BEGIN { OFS="\t"} {print $1,$2}'
 
-#Print lines where field $5 is empty
+Print lines where field $5 is empty
 awk ’$5 == ""’ file
 
 # <a name="linux">Linux</a>
@@ -106,3 +107,26 @@ Add "WP_" to the beginning of every new line
 
 Get the coordinates of a domain annotated in the `Protein` database record
 >efetch -db protein -id WP_025069012.1 -format gpc | xtract -insd Region region_name INSDInterval_from INSDInterval_to
+
+# <a name="Biowulf">Biowulf</a>
+#### Modules
+list all modules
+>module avail 
+
+list only default modules
+>module -d avail
+
+Search for modules, case-insensitive
+>module spider searchterm
+
+Set up a default set of modules:
+1. Make a folder named 'mymodules' and a file called `ngs` that looks like this 
+```
+#%Module 1.0
+module load bowtie/2-2.2.5
+module load samtools/0.1.18
+```
+2. Add that folder to the environment list
+>module use --append /home/user/mymodules
+3. Load all the modules in the file `ngs`
+>module load ngs
