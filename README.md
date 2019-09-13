@@ -141,3 +141,15 @@ List all faciliities
 
 Change version on the fly
 >facswitch python 3.7
+
+Start a jupyter notebook
+>jupyter lab --no-browser --port=8888 --ip=0.0.0.0
+
+Submit a batch job with 4 day time limit, at 4gb RAM, no email
+>qsub -v SGE_FACILITIES -P unified -l h_rt=259200,h_vmem=4G -n ./myjob.sh
+
+Kill all jobs
+>qdel -f -u benlersm
+
+How to submit multithreaded jobs. The qsub command below reserves 4 x 4G = 16G of reserved and free memory (m_mem_free and mem_free = 4G X 4 slots), so only hosts with at least 16G of RAM would be considered by the SGE scheduler to run this job. It sets a virtual memory limit of 24G ( h_vmem=6G x 4 slots).  
+>qsub -P unified -l h_vmem=6G,mem_free=4G,m_mem_free=4G -pe multicore 4 -R y ./fourway-job.sh
