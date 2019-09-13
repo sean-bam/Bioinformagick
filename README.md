@@ -7,7 +7,7 @@ Scripts for bioinformagicking
 2. [Random Linux stuff](#Linux)
 3. [E-utilities](#E-utilities)
 4. [Biowulf](#Biowulf)
-
+4. [CBB-Dev](#Biowulf)
 
 ...
 
@@ -120,13 +120,24 @@ Search for modules, case-insensitive
 >module spider searchterm
 
 Set up a default set of modules:
-1. Make a folder named 'mymodules' and a file called `ngs` that looks like this 
 ```
+#Make a folder named 'mymodules' and a file called `ngs` that looks like this 
 #%Module 1.0
 module load bowtie/2-2.2.5
 module load samtools/0.1.18
-```
-2. Add that folder to the environment list
+
+#Add that folder to the environment list
 >module use --append /home/user/mymodules
-3. Load all the modules in the file `ngs`
+
+#Load all the modules in the file `ngs`
 >module load ngs
+```
+# <a name="CBB-Dev">CBB-Dev</a>
+Search Facilities
+>ncbi-facilities-search
+
+List all faciliities
+>help_config
+
+Change version on the fly
+>facswitch python 3.7
