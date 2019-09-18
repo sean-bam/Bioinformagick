@@ -132,6 +132,18 @@ module load samtools/0.1.18
 #Load all the modules in the file `ngs`
 >module load ngs
 ```
+#### Job submission
+Notes from 09/18/walkin:
+1. Swarm files run each line in your file.swarm **independently**.
+2. Sbatch is equivalent to qsub. In your sbatch command, you can specificy the # of CPUs, amount of memory, and which nodes to allocate to.
+3. sinteractive is like the normal command line. Use this to debug/make sure everything works.
+4. To figure out which nodes to allocate to, use `freen`. This lists the partition (i.e, queue) and the number of free nodes. For each node, it has the number of CPUs (i.e., threads) and memory. So, for the *norm* queue, I can set up to `--cpus-per-task= 56` and `--mem 246Gb`. I was told I should set CPUs ~16-32 and mem ~30 gb for genomics from the walkin guy.
+
+#### data
+The hi-performance drive is /data/
+The high-volume / low-performance is /scratch
+The good-performance/good-volume is /lscratch
+
 # <a name="CBB-Dev">CBB-Dev</a>
 Search Facilities
 >ncbi-facilities-search
