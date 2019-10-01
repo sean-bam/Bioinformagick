@@ -68,6 +68,9 @@ display file size of subfolders
 compress a folder using tar
 >tar -zcvf archive.tar.gz directory/
 
+Check if two directories are equivalent
+>diff -r -q /path/to/folder1 /path/to/folder2
+
 >sort a file on field 1 only
 sort fileIN.txt -k 1,1 > fileOUT.txt
 
