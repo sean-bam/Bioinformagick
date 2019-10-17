@@ -7,7 +7,8 @@ Scripts for bioinformagicking
 2. [Random Linux stuff](#Linux)
 3. [E-utilities](#E-utilities)
 4. [Biowulf](#Biowulf)
-4. [CBB-Dev](#Biowulf)
+5. [CBB-Dev](#Biowulf)
+6. [Koonin](#Koonin)
 
 ...
 
@@ -168,3 +169,28 @@ Kill all jobs
 
 How to submit multithreaded jobs. The qsub command below reserves 4 x 4G = 16G of reserved and free memory (m_mem_free and mem_free = 4G X 4 slots), so only hosts with at least 16G of RAM would be considered by the SGE scheduler to run this job. It sets a virtual memory limit of 24G ( h_vmem=6G x 4 slots).  
 >qsub -P unified -l h_vmem=6G,mem_free=4G,m_mem_free=4G -pe multicore 4 -R y ./fourway-job.sh
+
+# <a name="Koonin">Koonin</a>
+
+#### Tab_header
+Parses a single column table with special headers, e.g., blast clust format:
+
+Example input :
+```
+cluster info: OKZU01000172.1    1803    1803
+OHLS01000002.1
+OHMA01003840.1
+OIOW01000503.1
+...
+```
+>tab_header -r="cluster info: (\S+)" fileIN
+
+Example output:
+```
+OKZU01000172.1  OHLS01000002.1
+OKZU01000172.1  OHMA01003840.1
+OKZU01000172.1  OIOW01000503.1
+OKZU01000172.1  OIOU01000477.1
+...
+```
+
