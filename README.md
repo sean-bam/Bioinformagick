@@ -42,9 +42,16 @@ Change output to tab delimited
 >awk 'BEGIN { OFS="\t"} {print $1,$2}'
 
 Print lines where field $5 is empty
-awk ’$5 == ""’ file
+>awk ’$5 == ""’ file
+
+Get the best hit of blast result
+>awk '!a[$1]++'"
 
 # <a name="linux">Linux</a>
+
+Rename a fasta header using the filename
+var=$(echo "file.fa" | cut -d'.' --complement -f2-).mito
+sed -i "1s/.*/>$var/" file.fa
 
 Read in variables as an array
 ```
