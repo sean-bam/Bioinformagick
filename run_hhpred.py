@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 This program accepts a directory of proteins sequences (one seq per file). 
 It sets up a script to run hhblits, hhpred.
@@ -31,6 +32,34 @@ parser.add_argument('-o',
                     help="name of the output directory",
                     required=True)
 
+parser.add_argument('-w',
+                    '--work',
+                    help="0 = Dry-run ; 1 = Execute. Default = 0",
+                    required=False)
+
+parser.add_argument('-nob',
+                    '--no_build',
+                    action='store_true',
+                    help="Don't build MSA with -n iterations through -db",
+                    required=False)
+
+parser.add_argument('-s',
+                    '--suffix',
+                    help="Input files have these suffixes, default = 'faa'",
+                    required=False)
+
+parser.add_argument('-msa',
+                    '--multiple_seq_align',
+                    action='store_true',
+                    help="Input is a multiple sequence alignment without consensus",
+                    required=False)
+
+parser.add_argument('-xcon',
+                    '--consensus',
+                    action='store_true',
+                    help="Input is a multiple sequence alignment with consensus",
+                    required=False)
+
 parser.add_argument('-db',
                     '--database',
                     help="HHsuite-formatted database. Default = /home/benlersm/data/hhsuite/UniRef30_2020_02",
@@ -44,6 +73,11 @@ parser.add_argument('-pdb',
 parser.add_argument('-n',
                     '--iterations',
                     help="Number of iterations. Default = '3'",
+                    required=False)
+
+parser.add_argument('-p',
+                    '--parse',
+                    help="Try to parse the output into a CSV table",
                     required=False)
 
 #parser.add_argument('-l',
@@ -68,6 +102,33 @@ if args.iterations:
     iterations = args.iterations
 else:
     iterations = 3
+
+if args.suffix:
+    suffix = args.suffix
+else:
+    suffix = 'faa'
+
+if args.work:
+    work = int(args.work)
+else:
+    work = 0
+assert(work == 0 or work == 1), f"Work must be '0' or '1' and you put {args.work}"
+
+hhblits_CDD_db = Path('/home/benlersm/data/hhsuite/CDD')
+
+if args.no_build:
+    assert(args.multiple_seq_align), f"""
+    You chose not to build an MSA (option --no_build) but did not specify
+    that the input files in {args.input} are MSAs already. 
+    Add option -msa to your command
+    """
+    
+if args.consensus:
+    assert(args.multiple_seq_align), f"""
+    You said the input files in {args.input} have consensus sequences, 
+    but did not specify they are MSAs.
+    Add option -msa to your command
+    """
 # Functions ------------------------------------------------------------------------------------------------
 
 def directory_to_chunks(directory, extension, chunk):
@@ -93,19 +154,21 @@ def make_submit_script(file):
     """
     
     print("#! /bin/bash", file = f)
-    print("#SBATCH --partition=multinode", file = f)
-    print("#SBATCH --constraint=x2695", file = f)
-    print("#SBATCH --ntasks=64", file = f)
-    print("#SBATCH --ntasks-per-core=1", file = f)
-    print("#SBATCH --exclusive", file = f)
-    print("#SBATCH --qos=turbo", file = f)
-    #print("#SBATCH --cpus-per-task=20", file = f)
-    #print("#SBATCH --mem=20g", file = f)
-    print("#SBATCH --gres=lscratch:400", file = f)
+    #print("#SBATCH --partition=multinode", file = f)
+    #print("#SBATCH --constraint=x2695", file = f)
+    #print("#SBATCH --ntasks=64", file = f)
+    #print("#SBATCH --ntasks-per-core=1", file = f)
+    #print("#SBATCH --exclusive", file = f)
+    #print("#SBATCH --qos=turbo", file = f)
+    print("#SBATCH --cpus-per-task=32", file = f)
+    print("#SBATCH --mem=20g", file = f)
+    print("#SBATCH --gres=lscratch:300", file = f)
     print("#SBATCH --time=06:00:00", file = f)
     print("module load hhsuite || exit 1", file = f)
-    print(f"cp {hhblits_uniprot_db}* /lscratch/$SLURM_JOB_ID", file = f)
+    if not args.no_build:
+        print(f"cp {hhblits_uniprot_db}* /lscratch/$SLURM_JOB_ID", file = f)
     print(f"cp {hhblits_pdb_db}* /lscratch/$SLURM_JOB_ID", file = f)
+    print(f"cp {hhblits_CDD_db}* /lscratch/$SLURM_JOB_ID", file = f)
     
 def check_jobs(jobs, sleep):
     """
@@ -144,8 +207,8 @@ def parse_hhr_output(hhrfile, num_hits=10):
     
     #Define the space-delimited field widths for Pandas
     colspecs = [(0, 3),  #RANK
-            (4, 10),  #ACCESSION
-            (11, 35), #DESCRIPTION
+            (4, 12),  #ACCESSION
+            (12, 35), #DESCRIPTION
             (36, 40), #PROB
             (41, 48), #EVAL
            (50, 55), #PVAL
@@ -267,7 +330,7 @@ def combine_hhr_results(file_list):
 #-----------------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
     #Make a list of n-sized file lists. This will be the number of queries per machine.
-    l1 = directory_to_chunks(args.input, 'faa', 40)
+    l1 = directory_to_chunks(args.input, suffix, 10)
 
     #Make numbers for the bash scripts
     x = random.randint(1, 1000)
@@ -276,10 +339,11 @@ if __name__ == '__main__':
     #set paths
     uniprot_db_local = '/lscratch/$SLURM_JOB_ID/' + hhblits_uniprot_db.stem
     pdb_db_local = '/lscratch/$SLURM_JOB_ID/' + hhblits_pdb_db.stem
+    cdd_db_local =  '/lscratch/$SLURM_JOB_ID/' + hhblits_CDD_db.stem
     
     #Set CPUs to the num_threads given in SBATCH script
-    #cpu = "$SLURM_CPUS_PER_TASK"
-    cpu = "$SLURM_NTASKS"
+    cpu = "$SLURM_CPUS_PER_TASK"
+    #cpu = "$SLURM_NTASKS"
 
     #Make the hhblits bash scripts
     for file_list in l1:
@@ -288,45 +352,75 @@ if __name__ == '__main__':
             for file in file_list:
                 a3m = file.with_suffix('.a3m')
                 hhpred = file.with_suffix('.hhpred')
-                if not a3m.exists():
-                    print(f'hhblits -i {file} -d {uniprot_db_local} -oa3m {a3m} -n {iterations} -norealign -cpu {cpu}',
-                     file = f)
+                
+                #If we want to build an MSA vs db
+                if not args.no_build: 
+                    #And the input is an MSA
+                    if args.multiple_seq_align:
+                        M_param = '49'
+                        #Does the MSA have a consensus?
+                        if args.consensus:
+                            M_param = 'first'
+                        print(f'hhblits -i {file} -M {M_param} -d {uniprot_db_local} -o /dev/null -oa3m {a3m} -n {iterations} -norealign -cpu {cpu}', file = f)
+                        
+                    #The input is not an MSA    
+                    else:
+                    #To do: assert single fasta seq as input
+                    #if not a3m.exists():
+                        print(f'hhblits -i {file} -d {uniprot_db_local} -o /dev/null -oa3m {a3m} -n {iterations} -norealign -cpu {cpu}', file = f)
+                
+                #Run HHPred
                 if not hhpred.exists():
-                    print(f'hhblits -i {a3m} -d {pdb_db_local} -o {hhpred} -n 1 -norealign -cpu {cpu}',
-                     file = f)
-            i += 1
+                    if args.multiple_seq_align:
+                        M_param = '49'
+                        if args.consensus:
+                            M_param = 'first'
+                        print(f'hhblits -i {file} -M {M_param} -d {pdb_db_local} -d {cdd_db_local} -o {hhpred} -n 1 -norealign -cpu {cpu}', file = f)
+                    else:
+                        print(f'hhblits -i {a3m} -d {pdb_db_local} -d {cdd_db_local} -o {hhpred} -n 1 -norealign -cpu {cpu}', file = f)
 
-    #submit the bash scripts, recording jobIDs
+    #Make sure each bash script has an hhblits command, otherwise remove.
     p = Path('.')
     bash_script_list = list(p.glob('submit_hhblits_' + str(x) + '*' + '.sh'))
-    jobids = []
-    
     for script in bash_script_list:
-        
-        #Make sure each bash script has an hhblits command, otherwise remove
         if "hhblits" not in str(open(script).readlines()):
             script.unlink()
-        
-        #Submit the jobs, recording jobIDs
-        p1 = subprocess.run(f"sbatch {script}", 
-                           shell = True, 
-                           check = True,
-                           universal_newlines = True,
-                           stdout=subprocess.PIPE
-                           )
-        
-        jobids.append(p1.stdout.strip())
-        
-        time.sleep(1)
-        
-    check_jobs(jobids, 300)
+            
+    #Check there is something to do
+    bash_script_list2 = list(p.glob('submit_hhblits_' + str(x) + '*' + '.sh'))
+    assert len(bash_script_list2) > 0, f"""
+    The input directory {args.input} has  *.hhpred outputs for every file it found.
+    That means there is nothing to do. Good news? If not, delete *.hhpred files to 
+    force a re-run
+    """
+    
+    #Submit the scripts. #0 is dry-run; 1 is execute
+    jobids = []
+    if args.work == 1:
+        for script in bash_script_list2:
+            #Submit the jobs, recording jobIDs
+            p1 = subprocess.run(f"sbatch {script}", 
+                               shell = True, 
+                               check = True,
+                               universal_newlines = True,
+                               stdout=subprocess.PIPE
+                               )
+
+            jobids.append(p1.stdout.strip())
+
+            time.sleep(1)
+
+            check_jobs(jobids, 300)
+            
+            #Cleanup the job submission scripts
+            for script in bash_script_list:
+                script.unlink()
         
     #Parse the output
-    file_list = list(Path(args.input).glob('*.hhpred'))
-    df = combine_hhr_results(file_list)
-    df.to_csv(args.output, index = False)
+    if args.parse:
+        file_list = list(Path(args.input).glob('*.hhpred'))
+        df = combine_hhr_results(file_list)
+        df.to_csv(args.output, index = False)
     
-    #Cleanup the job submission scripts
-    for script in bash_script_list:
-        script.unlink()
+    
     
