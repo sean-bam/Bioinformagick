@@ -37,10 +37,10 @@ parser.add_argument('-w',
                     help="0 = Dry-run ; 1 = Execute. Default = 0",
                     required=False)
 
-parser.add_argument('-nob',
-                    '--no_build',
+parser.add_argument('-b',
+                    '--build',
                     action='store_true',
-                    help="Don't build MSA with -n iterations through -db",
+                    help="Build an MSA with -n iterations through -db",
                     required=False)
 
 parser.add_argument('-s',
@@ -75,6 +75,17 @@ parser.add_argument('-n',
                     help="Number of iterations. Default = '3'",
                     required=False)
 
+parser.add_argument('-no_ssd',
+                    '--no_ssd',
+                    action='store_true',
+                    help="Do not transfer the HHsuite databases to /lscratch",
+                    required=False)
+
+parser.add_argument('-bt',
+                    '--batch_size',
+                    help="Number of queries to batch together into a single script. Default = '10'",
+                    required=False)
+
 parser.add_argument('-p',
                     '--parse',
                     help="Try to parse the output into a CSV table",
@@ -88,41 +99,43 @@ parser.add_argument('-p',
 args = parser.parse_args()
 
 # Constants ------------------------------------------------------------------------------------------------
+
+#Paths to HHsuite formatted DBs
+hhblits_uniprot_db = Path('/home/benlersm/data/hhsuite/UniRef30_2020_02')
+hhblits_pdb_db = Path('/home/benlersm/data/hhsuite/pdb70')
+hhblits_cdd_db = Path('/home/benlersm/data/hhsuite/CDD')
+
+#Number of iterations to build an MSA
+iterations = 3
+
+#Input file suffixes
+suffix = 'faa'
+
+#Effort - 0 is dry-run, 1 is submit
+work = 0
+
+#Number of queries to batch together
+batch = 10
+
 if args.database:
     hhblits_uniprot_db = args.database + '*'
-else:
-    hhblits_uniprot_db = Path('/home/benlersm/data/hhsuite/UniRef30_2020_02')
     
 if args.pdb_database:
     hhblits_pdb_db = args.pdb_database + '*'
-else:
-    hhblits_pdb_db = Path('/home/benlersm/data/hhsuite/pdb70')
     
 if args.iterations:
     iterations = args.iterations
-else:
-    iterations = 3
 
 if args.suffix:
     suffix = args.suffix
-else:
-    suffix = 'faa'
 
 if args.work:
     work = int(args.work)
-else:
-    work = 0
-assert(work == 0 or work == 1), f"Work must be '0' or '1' and you put {args.work}"
-
-hhblits_CDD_db = Path('/home/benlersm/data/hhsuite/CDD')
-
-if args.no_build:
-    assert(args.multiple_seq_align), f"""
-    You chose not to build an MSA (option --no_build) but did not specify
-    that the input files in {args.input} are MSAs already. 
-    Add option -msa to your command
-    """
+    assert(work == 0 or work == 1), f"Work must be '0' or '1' and you put {args.work}"
     
+if args.batch_size:
+    batch = int(args.batch_size)
+
 if args.consensus:
     assert(args.multiple_seq_align), f"""
     You said the input files in {args.input} have consensus sequences, 
@@ -147,28 +160,43 @@ def directory_to_chunks(directory, extension, chunk):
         file_list.append((files[i:i + chunk]))
     return file_list
 
-def make_submit_script(file):
+def make_submit_script(file, *dbs):
     """
     Accepts a writable object, prints the commands to configure a batch script
     Loads HHsuite, copies the databases to lscratch
     """
     
     print("#! /bin/bash", file = f)
+    print("#SBATCH --cpus-per-task=32", file = f)
+    print("#SBATCH --mem=20g", file = f)
+    if args.no_ssd:
+        pass
+    else:
+        #CDD = ~2g, UniRef ~177g, PDB ~60g
+        print("#SBATCH --gres=lscratch:300", file = f)
+    print("#SBATCH --time=06:00:00", file = f)
+    print("module load hhsuite || exit 1", file = f)
+    
+    #if the "no_ssd" flag is set, we dont want to transfer the DBs to /lscratch
+    if args.no_ssd:
+        pass
+    
+    #Otherwise, transfer
+    else:
+        print(f"cp {hhblits_pdb_db}* /lscratch/$SLURM_JOB_ID", file = f)
+        print(f"cp {hhblits_cdd_db}* /lscratch/$SLURM_JOB_ID", file = f)
+        
+        #if we need to build an MSA, transfer the uniprot_db
+        if args.build:
+            print(f"cp {hhblits_uniprot_db}* /lscratch/$SLURM_JOB_ID", file = f)
+    
+    #For MPI runs
     #print("#SBATCH --partition=multinode", file = f)
     #print("#SBATCH --constraint=x2695", file = f)
     #print("#SBATCH --ntasks=64", file = f)
     #print("#SBATCH --ntasks-per-core=1", file = f)
     #print("#SBATCH --exclusive", file = f)
     #print("#SBATCH --qos=turbo", file = f)
-    print("#SBATCH --cpus-per-task=32", file = f)
-    print("#SBATCH --mem=20g", file = f)
-    print("#SBATCH --gres=lscratch:300", file = f)
-    print("#SBATCH --time=06:00:00", file = f)
-    print("module load hhsuite || exit 1", file = f)
-    if not args.no_build:
-        print(f"cp {hhblits_uniprot_db}* /lscratch/$SLURM_JOB_ID", file = f)
-    print(f"cp {hhblits_pdb_db}* /lscratch/$SLURM_JOB_ID", file = f)
-    print(f"cp {hhblits_CDD_db}* /lscratch/$SLURM_JOB_ID", file = f)
     
 def check_jobs(jobs, sleep):
     """
@@ -327,72 +355,110 @@ def combine_hhr_results(file_list):
 
     return df3
 
+
+def make_hhblits_command(query, output, n, threads, swarmfile, *dbs, output_a3m = True):
+    """
+    Accepts a python pathlib object as a query, prints the hhblits command to swarmfile
+    """
+    
+    #Unpack the databases
+    db_list = [str(x) for x in dbs]
+    databases = " -d ".join(db_list)
+        
+    #Figure out what the input is and set the -M flag appropriately
+    if args.multiple_seq_align:
+        M_param = '-M 49'
+        #Does the MSA have a consensus?
+        if args.consensus:
+            M_param = '-M first'
+        #Is the MSA already in a3m format?
+        if query.suffix == ".a3m":
+            M_param = ""
+    
+    #If the query is an a3m MSA but the -msa flag wasn't set
+    elif query.suffix == ".a3m":
+            M_param = ""
+    else:
+        M_param = ""
+    
+    #Set the output msa
+    oa3m = ""
+    if output_a3m == True:
+        a3m = query.with_suffix('.a3m')
+        assert a3m.is_file() == False, f"""
+        You're trying to build an a3m-formatted MSA, but an a3m-formatted MSA already exists in the directory. Try disabling -build or delete the existing a3m file
+        """
+        oa3m = f"-oa3m {a3m}"
+    
+    #Print the command
+    print(f'hhblits -i {query} {M_param} -d {databases} -o {output} {oa3m} -n {n} -norealign -cpu {threads}',
+          file = swarmfile)
+
+
 #-----------------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
-    #Make a list of n-sized file lists. This will be the number of queries per machine.
-    l1 = directory_to_chunks(args.input, suffix, 10)
-
-    #Make numbers for the bash scripts
-    x = random.randint(1, 1000)
-    i = 1
+    #Make a list of batch-sized file lists. This will be the number of queries per machine.
+    l1 = directory_to_chunks(args.input, suffix, batch)
     
-    #set paths
-    uniprot_db_local = '/lscratch/$SLURM_JOB_ID/' + hhblits_uniprot_db.stem
-    pdb_db_local = '/lscratch/$SLURM_JOB_ID/' + hhblits_pdb_db.stem
-    cdd_db_local =  '/lscratch/$SLURM_JOB_ID/' + hhblits_CDD_db.stem
+    #set paths to HHsuite formatted databases
+   
     
     #Set CPUs to the num_threads given in SBATCH script
     cpu = "$SLURM_CPUS_PER_TASK"
+    
+    #If using MPI
     #cpu = "$SLURM_NTASKS"
+    
+    #Make numbers for the bash scripts
+    x = random.randint(1, 1000)
+    i = 1
 
     #Make the hhblits bash scripts
     for file_list in l1:
         with open('submit_hhblits_' + str(x) + '_' + str(i) + '.sh', 'a') as f:
             make_submit_script(f)
+            
+            if args.no_ssd:
+                #The paths to the HHsuite databases are the same as default
+                pass
+            else:
+                #The paths were moved to lscratch
+                hhblits_uniprot_db = '/lscratch/$SLURM_JOB_ID/' + hhblits_uniprot_db.stem
+                hhblits_pdb_db = '/lscratch/$SLURM_JOB_ID/' + hhblits_pdb_db.stem
+                hhblits_cdd_db =  '/lscratch/$SLURM_JOB_ID/' + hhblits_cdd_db.stem
+            
             for file in file_list:
-                a3m = file.with_suffix('.a3m')
-                hhpred = file.with_suffix('.hhpred')
                 
-                #If we want to build an MSA vs db
-                if not args.no_build: 
-                    #And the input is an MSA
-                    if args.multiple_seq_align:
-                        M_param = '49'
-                        #Does the MSA have a consensus?
-                        if args.consensus:
-                            M_param = 'first'
-                        print(f'hhblits -i {file} -M {M_param} -d {uniprot_db_local} -o /dev/null -oa3m {a3m} -n {iterations} -norealign -cpu {cpu}', file = f)
-                        
-                    #The input is not an MSA    
-                    else:
-                    #To do: assert single fasta seq as input
-                    #if not a3m.exists():
-                        print(f'hhblits -i {file} -d {uniprot_db_local} -o /dev/null -oa3m {a3m} -n {iterations} -norealign -cpu {cpu}', file = f)
-                
-                #Run HHPred
-                if not hhpred.exists():
-                    if args.multiple_seq_align:
-                        M_param = '49'
-                        if args.consensus:
-                            M_param = 'first'
-                        print(f'hhblits -i {file} -M {M_param} -d {pdb_db_local} -d {cdd_db_local} -o {hhpred} -n 1 -norealign -cpu {cpu}', file = f)
-                    else:
-                        print(f'hhblits -i {a3m} -d {pdb_db_local} -d {cdd_db_local} -o {hhpred} -n 1 -norealign -cpu {cpu}', file = f)
+                if args.build:
+                    #We need to build an MSA
+                    make_hhblits_command(file, 
+                                         '/dev/null', 
+                                         iterations, 
+                                         cpu, 
+                                         f, 
+                                         hhblits_uniprot_db, 
+                                         output_a3m = True)
+                    #set file equal to the resulting a3m
+                    file = file.with_suffix('.a3m')
+                    
+                make_hhblits_command(file, 
+                                     file.with_suffix('.hhr'), 
+                                     1, 
+                                     cpu, 
+                                     f, 
+                                     hhblits_pdb_db,
+                                     hhblits_cdd_db,
+                                     output_a3m = False)
+                    
+        #Increment i so that the multiple scripts get made
+        i += 1
 
     #Make sure each bash script has an hhblits command, otherwise remove.
-    p = Path('.')
-    bash_script_list = list(p.glob('submit_hhblits_' + str(x) + '*' + '.sh'))
-    for script in bash_script_list:
-        if "hhblits" not in str(open(script).readlines()):
-            script.unlink()
-            
-    #Check there is something to do
-    bash_script_list2 = list(p.glob('submit_hhblits_' + str(x) + '*' + '.sh'))
-    assert len(bash_script_list2) > 0, f"""
-    The input directory {args.input} has  *.hhpred outputs for every file it found.
-    That means there is nothing to do. Good news? If not, delete *.hhpred files to 
-    force a re-run
-    """
+    #p = Path('.')
+    #bash_script_list = list(p.glob('submit_hhblits_' + str(x) + '*' + '.sh'))
+    #for script in bash_script_list:
+    #    if "hhblits" not in str(open(script).readlines()):
+    #        script.unlink()
     
     #Submit the scripts. #0 is dry-run; 1 is execute
     jobids = []
@@ -413,7 +479,7 @@ if __name__ == '__main__':
             check_jobs(jobids, 300)
             
             #Cleanup the job submission scripts
-            for script in bash_script_list:
+            for script in bash_script_list2:
                 script.unlink()
         
     #Parse the output
