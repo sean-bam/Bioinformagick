@@ -62,7 +62,12 @@ parser.add_argument('-xcon',
 
 parser.add_argument('-db',
                     '--database',
-                    help="HHsuite-formatted database. Default = /home/benlersm/data/hhsuite/UniRef30_2020_02",
+                    help="""
+                    /Path/to/HHsuite-formatted-database.
+                    E.g., /databases/UniRef30_2020_02
+                    NOT /databases/UnirRef30_2020_02_a3m.ffdata
+                    Default = /home/benlersm/data/hhsuite/UniRef30_2020_02
+                    """,
                     required=False)
 
 parser.add_argument('-pdb',
@@ -84,6 +89,11 @@ parser.add_argument('-no_ssd',
 parser.add_argument('-bt',
                     '--batch_size',
                     help="Number of queries to batch together into a single script. Default = '10'",
+                    required=False)
+
+parser.add_argument('-t',
+                    '--threads',
+                    help="Number of threads per machine. Default = '32'",
                     required=False)
 
 parser.add_argument('-p',
@@ -117,14 +127,22 @@ work = 0
 #Number of queries to batch together
 batch = 10
 
+#Number of threads per machine
+threads = 32
+# Inputs  ----------------------------------------------------------------------------------------------
+
 if args.database:
-    hhblits_uniprot_db = args.database + '*'
+    hhblits_uniprot_db = args.database
+    #To do: Check the input is /path/to/database/db 
+    #Not /path/to/database
+    #and check if _a3m.ffdata exists
     
 if args.pdb_database:
-    hhblits_pdb_db = args.pdb_database + '*'
+    hhblits_pdb_db = args.pdb_database
     
 if args.iterations:
-    iterations = args.iterations
+    iterations = int(args.iterations)
+    assert(type(iterations) == int), f"Iterations must be a number, and you put {args.iterations}"
 
 if args.suffix:
     suffix = args.suffix
@@ -135,6 +153,11 @@ if args.work:
     
 if args.batch_size:
     batch = int(args.batch_size)
+    
+if args.threads:
+    threads = int(args.threads)
+
+assert Path(args.input).is_dir(), f"You provided '{args.input}' as an input, but it isn't a directory :/"
 
 if args.consensus:
     assert(args.multiple_seq_align), f"""
@@ -142,6 +165,8 @@ if args.consensus:
     but did not specify they are MSAs.
     Add option -msa to your command
     """
+    
+
 # Functions ------------------------------------------------------------------------------------------------
 
 def directory_to_chunks(directory, extension, chunk):
@@ -160,25 +185,26 @@ def directory_to_chunks(directory, extension, chunk):
         file_list.append((files[i:i + chunk]))
     return file_list
 
-def make_submit_script(file, *dbs):
+def make_submit_script(file, threads, *dbs):
     """
     Accepts a writable object, prints the commands to configure a batch script
     Loads HHsuite, copies the databases to lscratch
     """
     
-    print("#! /bin/bash", file = f)
-    print("#SBATCH --cpus-per-task=32", file = f)
+    print(f"#! /bin/bash", file = f)
+    print(f"#SBATCH --cpus-per-task={threads}", file = f)
     print("#SBATCH --mem=20g", file = f)
     if args.no_ssd:
+        #don't need lscratch space
         pass
     else:
         #CDD = ~2g, UniRef ~177g, PDB ~60g
         print("#SBATCH --gres=lscratch:300", file = f)
     print("#SBATCH --time=06:00:00", file = f)
     print("module load hhsuite || exit 1", file = f)
-    
-    #if the "no_ssd" flag is set, we dont want to transfer the DBs to /lscratch
+
     if args.no_ssd:
+        #we dont need to transfer the DBs to /lscratch
         pass
     
     #Otherwise, transfer
@@ -200,26 +226,29 @@ def make_submit_script(file, *dbs):
     
 def check_jobs(jobs, sleep):
     """
-    accepts a CSV-list of jobs. Checks status every SLEEP seconds,
-    Exits when no jobs are running/pending
+    accepts a python list of jobs. Checks status every SLEEP seconds,
+    Exits when no jobs are either running or pending
     """
     job_str = ",".join(jobs)
-    running_jobs = 1
-    pending_jobs = 1
-    while int(running_jobs) > 0 or int(pending_jobs) > 0:
-        p2 = subprocess.run(f'jobhist {job_str}',
+    
+    #Check every sleep seconds
+    time.sleep(sleep)
+    
+    p1 = subprocess.run(f'jobhist {job_str}',
                         check = True, 
                         shell = True,
                         universal_newlines = True,
                         stdout=subprocess.PIPE)
-        pending_jobs = p2.stdout.count("PENDING")
-        running_jobs = p2.stdout.count("RUNNING")
-        completed_jobs = p2.stdout.count("COMPLETED")
-        failed_jobs = p2.stdout.count("FAILED")
-
-        print(f'{pending_jobs} pending jobs, {running_jobs} running, {completed_jobs} completed, {failed_jobs} failed')
-
-        time.sleep(sleep)
+    pending_jobs = p1.stdout.count("PENDING")
+    running_jobs = p1.stdout.count("RUNNING")
+    completed_jobs = p1.stdout.count("COMPLETED")
+    failed_jobs = p1.stdout.count("FAILED")
+        
+    print(f'{pending_jobs} pending jobs, {running_jobs} running, {completed_jobs} completed, {failed_jobs} failed')
+        
+    while int(running_jobs) > 0 or int(pending_jobs) > 0:
+        return check_jobs(jobs, sleep)
+    
     print(f"""
     Done. {len(jobs)} were submitted. {pending_jobs} are pending, {running_jobs} are running,
     {completed_jobs} completed successfully and {failed_jobs} failed
@@ -233,73 +262,89 @@ def parse_hhr_output(hhrfile, num_hits=10):
     It returns a pandas dataframe of the top 10 hits, or the number defined by num_hits
     """
     
-    #Define the space-delimited field widths for Pandas
-    colspecs = [(0, 3),  #RANK
-            (4, 12),  #ACCESSION
-            (12, 35), #DESCRIPTION
-            (36, 40), #PROB
-            (41, 48), #EVAL
-           (50, 55), #PVAL
-            (56, 64), #SCORE
-            (64, 68), #SS
-            (69, 75), #cOLS
-            (76, 85), #QUERY HMM
-            (86, 100)] #TEMPLATE HMM
-    
-    #Define the column names
-    names = ['hitrank',
-             'accession', 
-             'desc',
-             'prob',
-            'eval',
-            'pval',
-            'score',
-            'ss',
-            'cols',
-            'query_hmm',
-            'template_hmm']
-    
     df_list = []
-    with open(hhrfile) as f:
+    with open(hhrfile, encoding='utf-8', errors='ignore') as f:
         lines = f.readlines()
         query = lines[0].strip().split()[1]
         
-        #lines 9-19 contain the table of top 10 hits
-        for i in range(9, 19):
+        #lines 9-509 contain the table of top 500 hits
+        for i in range(9, 509):
             line = lines[i]
-            df = pd.read_fwf(StringIO(line), 
-                                 headers = None, 
-                                 colspecs = colspecs,
-                                 names = names
-                                )
-            df_list.append(df)
-    df4 = pd.concat(df_list)
+            
+            #Analyze the lines only if they start with a digit
+            try:
+                if line.split()[0].isdigit():
+                    hit_raw, prob, evalue, pvalue, score, ss, cols, q_hmm, t_hmm, tlen = line.rsplit(maxsplit = 9)
+                    
+                    #Most times template_hmm and tlen are separated by a space;
+                    # 92-310 (449)
+                    #But if the template_hmm is long, they are not, and it looks like this:
+                    # 802-1021(1151)
+                    #Fucking hell. If so, skip that line
+                    
+                    try:
+                        #will raise a ValueError if prob doesnt equal a float b/c of the above issue
+                        prob2 = float(prob)
+                        
+                        #parse out the hit and accession
+                        hitrank = (hit_raw.split(maxsplit = 2)[0])
+                        accession = (hit_raw.split(maxsplit = 2)[1])
+                        
+                        #make a pandas dataframe
+                        d = {'hitrank' : hitrank,
+                             'accession' : accession,
+                             'prob' : prob2,
+                             'evalue' : evalue,
+                             'pvalue' : pvalue,
+                             'score' : score,
+                             'ss' : ss,
+                             'cols' : cols,
+                             'query_hmm' : q_hmm,
+                             'template_hmm' : t_hmm,
+                             'template_length' : tlen}
+                        df = pd.DataFrame(data = d, index = [0])
+                        
+                        #add the df's to a list
+                        df_list.append(df)
+        
+                    #pass over the line if prob2 isn't  a float
+                    except ValueError:
+                        pass
+                    
+            #If there are fewer than 500 hits, the subsequent line will be empty
+            #and will raise an IndexError
+            except IndexError:
+                break
     
-    #split the accession column into two
-    df4[["accession", "chain"]] = df4["accession"].str.split("_", expand = True)
+    #Combine the results together. This is ugly.
+    df2 = (pd.concat(df_list)
+             .drop(columns = "hitrank")
+             .reset_index()
+             .drop(columns = 'index')
+          )
     
     #set a column containing the query name
-    df4["query"] = query
+    df2["query"] = query
+    df2["file"] = Path(hhrfile).stem
     
-    #reorder the columns
-    df5 = df4[["query", 
-               "hitrank", 
-               "accession", 
-               "chain", 
-               "desc", 
-               "prob",
-               "eval",
-               "pval",
-               "score",
-               "ss",
-               "cols",
-               "query_hmm",
-               "template_hmm"]]
+    #reorganize the columns
+    df3 = df2[["file",
+              "query",
+              "accession", 
+              "prob",
+              "evalue", 
+              "pvalue", 
+              "score", 
+              "ss", 
+              "cols", 
+              "query_hmm", 
+              "template_hmm", 
+              "template_length"]]
     
     #select only X number of hts
-    df6 = df5.query('hitrank <= @num_hits')
+    df4 = df3.query('index <= @num_hits')
     
-    return df6
+    return df4
 
 
 def add_pdb_metadata_to_hhr_df(hhr_df):
@@ -329,6 +374,7 @@ def add_pdb_metadata_to_hhr_df(hhr_df):
                      "EXPERIMENT"
                     ]
            )
+    
 
     merge = pd.merge(hhr_df, 
                      metadata_df, 
@@ -351,9 +397,9 @@ def combine_hhr_results(file_list):
         df = parse_hhr_output(f, 1)
         df_list.append(df)
     df2 = pd.concat(df_list)
-    df3 = add_pdb_metadata_to_hhr_df(df2)
+    #df3 = add_pdb_metadata_to_hhr_df(df2)
 
-    return df3
+    return df2
 
 
 def make_hhblits_command(query, output, n, threads, swarmfile, *dbs, output_a3m = True):
@@ -416,16 +462,18 @@ if __name__ == '__main__':
     #Make the hhblits bash scripts
     for file_list in l1:
         with open('submit_hhblits_' + str(x) + '_' + str(i) + '.sh', 'a') as f:
-            make_submit_script(f)
+            make_submit_script(f, threads)
             
             if args.no_ssd:
                 #The paths to the HHsuite databases are the same as default
-                pass
+                hhblits_uniprot_db_local = hhblits_uniprot_db
+                hhblits_pdb_db_local = hhblits_pdb_db
+                hhblits_cdd_db_local =  hhblits_cdd_db
             else:
-                #The paths were moved to lscratch
-                hhblits_uniprot_db = '/lscratch/$SLURM_JOB_ID/' + hhblits_uniprot_db.stem
-                hhblits_pdb_db = '/lscratch/$SLURM_JOB_ID/' + hhblits_pdb_db.stem
-                hhblits_cdd_db =  '/lscratch/$SLURM_JOB_ID/' + hhblits_cdd_db.stem
+                #The paths were moved to lscratch, update
+                hhblits_uniprot_db_local = Path('/lscratch/$SLURM_JOB_ID/' + hhblits_uniprot_db.stem)
+                hhblits_pdb_db_local = Path('/lscratch/$SLURM_JOB_ID/' + hhblits_pdb_db.stem)
+                hhblits_cdd_db_local =  Path('/lscratch/$SLURM_JOB_ID/' + hhblits_cdd_db.stem)
             
             for file in file_list:
                 
@@ -436,9 +484,10 @@ if __name__ == '__main__':
                                          iterations, 
                                          cpu, 
                                          f, 
-                                         hhblits_uniprot_db, 
+                                         hhblits_uniprot_db_local, 
                                          output_a3m = True)
-                    #set file equal to the resulting a3m
+                    
+                    #set file equal to the constructed a3m-formatted MSA
                     file = file.with_suffix('.a3m')
                     
                 make_hhblits_command(file, 
@@ -446,47 +495,51 @@ if __name__ == '__main__':
                                      1, 
                                      cpu, 
                                      f, 
-                                     hhblits_pdb_db,
-                                     hhblits_cdd_db,
+                                     hhblits_pdb_db_local,
+                                     hhblits_cdd_db_local,
                                      output_a3m = False)
                     
         #Increment i so that the multiple scripts get made
         i += 1
-
-    #Make sure each bash script has an hhblits command, otherwise remove.
-    #p = Path('.')
-    #bash_script_list = list(p.glob('submit_hhblits_' + str(x) + '*' + '.sh'))
+    
+    #check if an hhblits command is present, otherwise delete
     #for script in bash_script_list:
     #    if "hhblits" not in str(open(script).readlines()):
     #        script.unlink()
     
+    
     #Submit the scripts. #0 is dry-run; 1 is execute
-    jobids = []
-    if args.work == 1:
-        for script in bash_script_list2:
+    if work == 1:
+        
+        bash_script_list = list(Path('.').glob('submit_hhblits_' + str(x) + '*' + '.sh'))
+        jobids = []
+        
+        for script in bash_script_list:
             #Submit the jobs, recording jobIDs
             p1 = subprocess.run(f"sbatch {script}", 
                                shell = True, 
                                check = True,
                                universal_newlines = True,
-                               stdout=subprocess.PIPE
+                               stdout = subprocess.PIPE
                                )
-
+            print(f"submitted {script} with job id {p1.stdout.strip()}")
             jobids.append(p1.stdout.strip())
 
             time.sleep(1)
 
-            check_jobs(jobids, 300)
-            
-            #Cleanup the job submission scripts
-            for script in bash_script_list2:
-                script.unlink()
+        check_jobs(jobids, 60)
         
-    #Parse the output
-    if args.parse:
-        file_list = list(Path(args.input).glob('*.hhpred'))
-        df = combine_hhr_results(file_list)
-        df.to_csv(args.output, index = False)
-    
+        #Parse the output
+        if args.parse:
+            file_list = list(Path(args.input).glob('*.hhr'))
+            df = combine_hhr_results(file_list)
+            df.to_csv(args.output, index = False)
+            
+        #Cleanup the job submission scripts
+        for script in bash_script_list:
+            script.unlink()
+        for jobid in jobids:
+            Path('slurm-' + jobid + '.out').unlink()
+
     
     
