@@ -289,10 +289,12 @@ def parse_hhr_output(hhrfile, num_hits=10):
                         #parse out the hit and accession
                         hitrank = (hit_raw.split(maxsplit = 2)[0])
                         accession = (hit_raw.split(maxsplit = 2)[1])
+                        desc = (hit_raw.split(maxsplit = 2)[2])
                         
                         #make a pandas dataframe
                         d = {'hitrank' : hitrank,
                              'accession' : accession,
+                             'desc': desc,
                              'prob' : prob2,
                              'evalue' : evalue,
                              'pvalue' : pvalue,
@@ -316,12 +318,8 @@ def parse_hhr_output(hhrfile, num_hits=10):
             except IndexError:
                 break
     
-    #Combine the results together. This is ugly.
-    df2 = (pd.concat(df_list)
-             .drop(columns = "hitrank")
-             .reset_index()
-             .drop(columns = 'index')
-          )
+    #Combine the results together.
+    df2 = pd.concat(df_list)
     
     #set a column containing the query name
     df2["query"] = query
@@ -330,7 +328,8 @@ def parse_hhr_output(hhrfile, num_hits=10):
     #reorganize the columns
     df3 = df2[["file",
               "query",
-              "accession", 
+              "accession",
+              "desc",
               "prob",
               "evalue", 
               "pvalue", 
@@ -396,7 +395,7 @@ def combine_hhr_results(file_list):
     for f in file_list:
         df = parse_hhr_output(f, 1)
         df_list.append(df)
-    df2 = pd.concat(df_list)
+    df2 = pd.concat(df_list, ignore_index = True)
     #df3 = add_pdb_metadata_to_hhr_df(df2)
 
     return df2
