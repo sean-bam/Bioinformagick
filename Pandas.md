@@ -9,3 +9,16 @@ s.name = 'Members'                                             # needs a name to
 del df['Members']
 df2 = df.join(s)
 ```
+
+Set a column with the count of elements in another column: **Not working**
+```
+df["size"] = (df.groupby(by = ['mash_cluster_rep'])['mash_cluster_rep']
+                                .transform('count')
+                             )
+```
+
+Update values in columns of one dataframe using columns of another dataframe. Only matching columns are updated!
+[Source](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.update.html)
+```
+df1.update(df)
+```
