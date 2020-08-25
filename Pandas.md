@@ -10,7 +10,7 @@ del df['Members']
 df2 = df.join(s)
 ```
 
-Set a column with the count of elements in another column: **Not working**
+Set a column with the count of elements in another column.
 ```
 df["size"] = (df.groupby(by = ['mash_cluster_rep'])['mash_cluster_rep']
                                 .transform('count')
