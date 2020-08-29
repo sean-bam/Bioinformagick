@@ -1,5 +1,23 @@
-Set a column based on a pd.query result:
+Set a new column based on a `query` result:
 >df.loc[df.query('ColumnA > 3').index, "new_column"] = "Triplet"
+
+Update a column based on multiple conditions using `mask` or `where`. Note: Use `&` instead of `and`.
+```
+#Make boolean criteria
+cond1 = df.Genus == "-"
+cond2 = df.Family == "Siphoviridae"
+cond3 = df.Family == "Myoviridae"
+cond4 = df.Family == "Podoviridae"
+cond5 = df.Subfamily.isna()
+
+#Mask the dataframe using the boolean criteria, which preserves the shape of the dataframe. 
+#Unmasked values become NaN, so fill those
+#return the new column
+df["Family"] = (df.mask(cond1 & (cond2 | cond3 | cond4) & cond5)
+                                .fillna({"Family" : "-"})
+                                .loc[:,"Family"])
+
+```
 
 Explode a cell into rows ([Source](https://stackoverflow.com/questions/17116814/pandas-how-do-i-split-text-in-a-column-into-multiple-rows/21032532))
 ```
