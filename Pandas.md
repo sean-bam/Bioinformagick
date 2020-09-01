@@ -30,9 +30,18 @@ df2 = df.join(s)
 
 Set a column with the count of elements in another column.
 ```
+#Option1
 df["size"] = (df.groupby(by = ['mash_cluster_rep'])['mash_cluster_rep']
                                 .transform('count')
                              )
+                             
+#Option2
+df = (pd.read_csv('old/pevzner_candidate_phage_annotated.csv')
+        .fillna('None') #groupby drops the row if NaN (?)
+        .groupby(['Order','Family','Subfamily', 'Genus', "NodeID"])
+        .size()
+        .reset_index(name='Count')
+      )
 ```
 
 Update values in columns of one dataframe using columns of another dataframe. Only matching columns are updated!
