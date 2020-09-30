@@ -44,8 +44,24 @@ df = (pd.read_csv('old/pevzner_candidate_phage_annotated.csv')
       )
 ```
 
-Update values in columns of one dataframe using columns of another dataframe. Only matching columns are updated!
+Update values in columns of one dataframe using columns of another dataframe. Only matching indexes+columns are updated!
 [Source](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.update.html)
 ```
 df1.update(df)
+```
+
+Select rows before and after a given row
+[Source](https://stackoverflow.com/questions/48630060/select-n-rows-above-and-below-a-specific-row-in-pandas)
+```
+#Select rows of interest
+idxs = df.query('name == "Mn_catalase_like" or name == "Dps"').index
+
+#Loop through the list, slice the dataframe using iloc and the target index, +/- 2 rows
+df_list = []
+for idx in idxs:
+    df1 = df.iloc[idx - 2 : idx + 2]
+    df_list.append(df1)
+    
+#combine the results into a single dataframe
+df2 = pd.concat(df_list)
 ```
