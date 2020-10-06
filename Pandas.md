@@ -1,7 +1,8 @@
-Set a new column based on a `query` result:
+**Set a new column based on a `query` result:**
 >df.loc[df.query('ColumnA > 3').index, "new_column"] = "Triplet"
 
-Update a column based on multiple conditions using `mask` or `where`. Note: Use `&` instead of `and`.
+**Update a column based on multiple conditions using `mask` or `where`.**
+Note: Use `&` instead of `and`.
 ```
 #Make boolean criteria
 cond1 = df.Genus == "-"
@@ -19,7 +20,7 @@ df["Family"] = (df.mask(cond1 & (cond2 | cond3 | cond4) & cond5)
 
 ```
 
-Explode a cell into rows ([Source](https://stackoverflow.com/questions/17116814/pandas-how-do-i-split-text-in-a-column-into-multiple-rows/21032532))
+**Explode a cell into rows** ([Source](https://stackoverflow.com/questions/17116814/pandas-how-do-i-split-text-in-a-column-into-multiple-rows/21032532))
 ```
 s = df['Members'].str.split(',').apply(pd.Series, 1).stack()   #Split the cells in "Members" by commas
 s.index = s.index.droplevel(-1)                                # to line up with df's index
@@ -28,7 +29,7 @@ del df['Members']
 df2 = df.join(s)
 ```
 
-Set a column with the count of elements in another column.
+**Set a column with the count of elements in another column.**
 ```
 #Option1
 df["size"] = (df.groupby(by = ['mash_cluster_rep'])['mash_cluster_rep']
@@ -44,13 +45,15 @@ df = (pd.read_csv('old/pevzner_candidate_phage_annotated.csv')
       )
 ```
 
-Update values in columns of one dataframe using columns of another dataframe. Only matching indexes+columns are updated!
+**Update values in columns of one dataframe using columns of another dataframe.** 
+Note: Only matching indexes+columns are updated! Use `df.set_index()` to change indexes
+Note: Duplicate indexes mess this up
 [Source](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.update.html)
 ```
 df1.update(df)
 ```
 
-Select rows before and after a given row
+**Select rows before and after a given row**
 [Source](https://stackoverflow.com/questions/48630060/select-n-rows-above-and-below-a-specific-row-in-pandas)
 ```
 #Select rows of interest
@@ -64,4 +67,17 @@ for idx in idxs:
     
 #combine the results into a single dataframe
 df2 = pd.concat(df_list)
+```
+
+**Split a dataframe into groups, set a column with the results of a named aggregation**
+```
+grouped = df_psiblast4.groupby(['phage', 'contig'])
+
+#Make a column named "shared_orfs" that takes the column "protein_id" and calculates its size.
+df_shared = grouped.agg(shared_orfs=pd.NamedAgg(column='protein_id', 
+                                                   aggfunc='size'
+                                                  )
+                          )
+
+df_shared2 = df_shared.reset_index()
 ```
