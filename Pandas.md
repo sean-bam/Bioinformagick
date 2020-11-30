@@ -81,3 +81,12 @@ df_shared = grouped.agg(shared_orfs=pd.NamedAgg(column='protein_id',
 
 df_shared2 = df_shared.reset_index()
 ```
+
+**Remove reciprocal entries**
+df = df.loc[:,["qaccver", "q_ign", "subj_ign", "dist", "IR_dist"]]
+
+#create a column that joins Seq1 - Seq2 or Seq2 - Seq1 to Seq1Seq2
+df["pairs"] = df.apply(lambda row: ''.join(sorted([row["q_ign"], row["subj_ign"]])), axis = 1)
+
+#remove rows with no matching pair and sort the database
+df2 = df.drop_duplicates(subset = 'pairs').drop(columns = ['pairs'])
