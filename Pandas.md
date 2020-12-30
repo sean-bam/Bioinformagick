@@ -44,6 +44,15 @@ df = (pd.read_csv('old/pevzner_candidate_phage_annotated.csv')
         .reset_index(name='Count')
       )
 ```
+**How to Split-Apply-Combine**
+```
+#Define a function you want to apply to the group
+def calculate_length(group):
+    group["length"] = group["end"] - group["start"]
+    
+#Split the dataframe by something, apply the function. The results are automatically applied to every group
+df2 = df.groupby('accession').apply(calculate_length
+```
 
 **Update values in columns of one dataframe using columns of another dataframe.** 
 Note: Only matching indexes+columns are updated! Use `df.set_index()` to change indexes
