@@ -101,3 +101,9 @@ df["pairs"] = df.apply(lambda row: ''.join(sorted([row["q_ign"], row["subj_ign"]
 #remove rows with no matching pair and sort the database
 df2 = df.drop_duplicates(subset = 'pairs').drop(columns = ['pairs'])
 ```
+
+**Get the first group in a groupby object**
+```
+group = df.groupby('motif_name')
+df2 = group.get_group((list(group.groups)[0]))
+```
