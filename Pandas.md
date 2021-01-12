@@ -51,7 +51,10 @@ def calculate_length(group):
     group["length"] = group["end"] - group["start"]
     
 #Split the dataframe by something, apply the function. The results are automatically applied to every group
-df2 = df.groupby('accession').apply(calculate_length
+df2 = df.groupby('accession').apply(calculate_length)
+
+#Rest the index to return the dataframe to its original shape
+df3 = df2.reset_index(drop = True)
 ```
 
 **Update values in columns of one dataframe using columns of another dataframe.** 
