@@ -201,3 +201,6 @@ OKZU01000172.1  OIOU01000477.1
 ...
 ```
 
+#### ali_cluster
+Gets representative sequences from an alignment. 
+Takes an alignment, builds a tree, build subtrees, calculate consensus of subtree members, take all consensus sequences.
