@@ -204,3 +204,10 @@ OKZU01000172.1  OIOU01000477.1
 #### ali_cluster
 Gets representative sequences from an alignment. 
 Takes an alignment, builds a tree, build subtrees, calculate consensus of subtree members, take all consensus sequences.
+
+#### Prof_align
+clusters input sequences with `run_mmclust` --> cleans alignments with `sr_scorematch` and `sr_filter` --> compares clusters with `run_hhsearch` --> computes a distance matrix from normalized HHsearch scores with `hhres2dis_mat` and `run_h_clust` --> builds a UPGMA tree from the distance matrix --> slices the tree tips at a defined distance with `tree_tips` --> aligns the sequences at the tree tips with `hh_guided_align` --> makes superclusters alignments with `run_mafft`.
+
+Yuri suggests the maximum input is 5-10k sequences. Ideally, cluster at >80% identity. If above 10k sequences, divide and conquer: run prof_align once and look at the tree. Select deep branches, and run those branches through prof_align independently. 
+
+The default thresholds are pretty conservative. Changing the mmseq coverage threshold or UPGMA depth threshold can result in bigger superclusters.
