@@ -110,3 +110,13 @@ df2 = df.drop_duplicates(subset = 'pairs').drop(columns = ['pairs'])
 group = df.groupby('motif_name')
 df2 = group.get_group((list(group.groups)[0]))
 ```
+
+**Bin continuous data into custom bins**
+From [here](https://towardsdatascience.com/histograms-with-plotly-express-complete-guide-d483656c5ad7)
+```
+bins = [0,25,50,75,100,1000,10000,100000]
+df['counts'] = pd.cut(df['dist_from_att'], bins=bins, include_lowest = True)
+df_hist = df["counts"].value_counts().sort_index().to_frame().reset_index()
+df_hist.rename(columns = {'index' : 'bins'}, inplace = True)
+df_hist["bins"] = df_hist["bins"].astype('str')
+```
