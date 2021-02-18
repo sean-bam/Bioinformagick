@@ -1056,6 +1056,7 @@ def entrez_2_island(accession_list, output_dir, chr_start=0, chr_stop=100000000)
     #                      'annotation', 
     #                      'strand']
     #            )
+    assert not df.empty, f"one of the accessions did not return any proteins"
 
     #Make a column named strand
     df.loc[df.query('Raw_coords.str.contains("complement")').index, "sign"] = "-"

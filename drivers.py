@@ -290,9 +290,10 @@ def entrez_nuccore_to_protein(accession_list, output, chr_start=0, chr_stop=1000
     Optional chromosome start/stop filtering
     """
     
-    
-    assert type(accession_list) == list, f"{accession_list} is not a list"
-    assert len(accession_list) > 0, f"{accession_list} is empty!"
+    if type(accession_list) != list:
+        accession_list = [accession_list]
+    #assert type(accession_list) == list, f"{accession_list} is not a list"
+    #assert len(accession_list) > 0, f"{accession_list} is empty!"
     
     if not Path(output).parent.is_dir():
         Path(output).parent.mkdir(parents = True)
