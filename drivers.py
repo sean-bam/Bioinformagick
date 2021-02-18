@@ -189,34 +189,76 @@ def entrez_nuccore_to_taxonomy(accession_list, output):
     
     if not Path(output).parent.is_dir():
         Path(output).parent.mkdir(parents = True)
+        
+    assert not Path(output).exists(), f"The file {output} exists already and we don't want to overwrite it"
     
-    with open(output, 'w') as f:
-        print(f"Accession", 
-              "TaxID", 
-              "ScientificName", 
-              "Kingdom", 
-              "Phylum", 
-              "Class", 
-              "Order", 
-              "Family", 
-              "Subfamily", 
-              "Genus",
-              sep = ",",
-              file = f)
+    #split the accessions into chunks of n
+    chunker_gen = parsers.chunks(accession_list, 200)
     
-        for accession in accession_list:
-            p1 = subprocess.run(f'elink -db nuccore -target taxonomy -name nuccore_taxonomy -id {accession} | efetch -format xml | xtract -pattern Taxon -tab "," -first TaxId ScientificName -group Taxon -KING "(-)" -PHYL "(-)" -CLSS "(-)" -ORDR "(-)" -FMLY "(-)" -SFMLY "(-)" -GNUS "(-)" -block "*/Taxon" -match "Rank:kingdom" -KING ScientificName -block "*/Taxon" -match "Rank:phylum" -PHYL ScientificName -block "*/Taxon" -match "Rank:class" -CLSS ScientificName -block "*/Taxon" -match "Rank:order" -ORDR ScientificName -block "*/Taxon" -match "Rank:family" -FMLY ScientificName -block "*/Taxon" -match "Rank:subfamily" -SFMLY ScientificName -block "*/Taxon" -match "Rank:genus" -GNUS ScientificName -group Taxon -tab "," -element "&KING" "&PHYL" "&CLSS" "&ORDR" "&FMLY" "&SFMLY" "&GNUS"',
+    #keep a count of how many accessions don't return a result
+    missed = 0
+    taxids = []
+    with open('tmp_accession_to_taxid_123.csv', 'w') as t:       
+        for lst in chunker_gen:
+            
+            #get a table of accession->taxid
+            command = f'efetch -format docsum -db nuccore -id {lst} | xtract -pattern DocumentSummary -element AccessionVersion TaxId '
+            p1 = subprocess.run(command,
                                 capture_output = True,
                                 shell = True,
                                 check = True,
                                 text = True
-                        )
+                               )
+            print(p1.stdout, file = t)
+        
+        #get a list of taxids
+    df = pd.read_csv('tmp_accession_to_taxid_123.csv', sep = '\t', header = None, names = ["accession", "taxid"])
+    taxids = df.taxid.unique().tolist()
+        
+    with open('tmp_taxid_to_lineage_123.csv', 'w') as f:
+        
+        #split the taxids into a reasonable amount
+        chunker_gen = parsers.chunks(taxids, 200)
+        
+        for lst in chunker_gen:
+        
+            command = f'efetch -format xml -db taxonomy -id {lst} | xtract -pattern Taxon -tab "," -first TaxId ScientificName -group Taxon -KING "(-)" -PHYL "(-)" -CLSS "(-)" -ORDR "(-)" -FMLY "(-)" -SFMLY "(-)" -GNUS "(-)" -block "*/Taxon" -match "Rank:kingdom" -KING ScientificName -block "*/Taxon" -match "Rank:phylum" -PHYL ScientificName -block "*/Taxon" -match "Rank:class" -CLSS ScientificName -block "*/Taxon" -match "Rank:order" -ORDR ScientificName -block "*/Taxon" -match "Rank:family" -FMLY ScientificName -block "*/Taxon" -match "Rank:subfamily" -SFMLY ScientificName -block "*/Taxon" -match "Rank:genus" -GNUS ScientificName -group Taxon -tab "," -element "&KING" "&PHYL" "&CLSS" "&ORDR" "&FMLY" "&SFMLY" "&GNUS"'
+        
+            p1 = subprocess.run(command,
+                                capture_output = True,
+                                shell = True,
+                                check = True,
+                                text = True
+                               )
+     
     
-            print(accession, 
-                p1.stdout, 
+            print(p1.stdout, 
                 sep = ",", 
                 #end = '', 
                 file = f)
+        
+    #print the output
+ 
+    cols = ["taxid", 
+      "ScientificName", 
+      "Kingdom", 
+      "Phylum", 
+      "Class", 
+      "Order", 
+      "Family", 
+      "Subfamily", 
+      "Genus",
+       ]
+        
+    df2 = pd.read_csv('tmp_taxid_to_lineage_123.csv', header = None, names = cols)
+
+    df3 = pd.merge(df, df2, how = 'left', on = 'taxid')
+    df3.to_csv(output, index = False)
+    
+    #remove tmp files
+    Path('tmp_accession_to_taxid_123.csv').unlink()
+    Path('tmp_taxid_to_lineage_123.csv').unlink()
+
             
 def entrez_nuccore_to_sra(protein_accession_list, output):
     """
