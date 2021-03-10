@@ -222,7 +222,7 @@ def entrez_nuccore_to_taxonomy(accession_list, output):
         
         for lst in chunker_gen:
         
-            command = f'efetch -format xml -db taxonomy -id {lst} | xtract -pattern Taxon -tab "," -first TaxId ScientificName -group Taxon -KING "(-)" -PHYL "(-)" -CLSS "(-)" -ORDR "(-)" -FMLY "(-)" -SFMLY "(-)" -GNUS "(-)" -block "*/Taxon" -match "Rank:kingdom" -KING ScientificName -block "*/Taxon" -match "Rank:phylum" -PHYL ScientificName -block "*/Taxon" -match "Rank:class" -CLSS ScientificName -block "*/Taxon" -match "Rank:order" -ORDR ScientificName -block "*/Taxon" -match "Rank:family" -FMLY ScientificName -block "*/Taxon" -match "Rank:subfamily" -SFMLY ScientificName -block "*/Taxon" -match "Rank:genus" -GNUS ScientificName -group Taxon -tab "," -element "&KING" "&PHYL" "&CLSS" "&ORDR" "&FMLY" "&SFMLY" "&GNUS"'
+            command = f'efetch -format xml -db taxonomy -id {lst} | xtract -pattern Taxon -tab "~" -first TaxId ScientificName -group Taxon -KING "(-)" -PHYL "(-)" -CLSS "(-)" -ORDR "(-)" -FMLY "(-)" -SFMLY "(-)" -GNUS "(-)" -block "*/Taxon" -match "Rank:kingdom" -KING ScientificName -block "*/Taxon" -match "Rank:phylum" -PHYL ScientificName -block "*/Taxon" -match "Rank:class" -CLSS ScientificName -block "*/Taxon" -match "Rank:order" -ORDR ScientificName -block "*/Taxon" -match "Rank:family" -FMLY ScientificName -block "*/Taxon" -match "Rank:subfamily" -SFMLY ScientificName -block "*/Taxon" -match "Rank:genus" -GNUS ScientificName -group Taxon -tab "~" -element "&KING" "&PHYL" "&CLSS" "&ORDR" "&FMLY" "&SFMLY" "&GNUS"'
         
             p1 = subprocess.run(command,
                                 capture_output = True,
@@ -233,7 +233,7 @@ def entrez_nuccore_to_taxonomy(accession_list, output):
      
     
             print(p1.stdout, 
-                sep = ",", 
+                sep = "~", 
                 #end = '', 
                 file = f)
         
@@ -250,7 +250,7 @@ def entrez_nuccore_to_taxonomy(accession_list, output):
       "Genus",
        ]
         
-    df2 = pd.read_csv('tmp_taxid_to_lineage_123.csv', header = None, names = cols)
+    df2 = pd.read_csv('tmp_taxid_to_lineage_123.csv', header = None, names = cols, sep = "~")
 
     df3 = pd.merge(df, df2, how = 'left', on = 'taxid')
     df3.to_csv(output, index = False)
