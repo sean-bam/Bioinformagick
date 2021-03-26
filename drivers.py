@@ -408,3 +408,26 @@ def entrez_assembly_to_file(accession_list, output, filetype = "genbank", databa
                           check = True)
             i += 1
     print(f"downloaded {i} files to {output}")
+    
+def entrez_cdd_superfamily_to_members(accessions):
+    """
+    given an iterable of superfamily accessions (e.g., cl00656),
+    gets all the cdd profiles belonging to that supercluster
+    returns a dataframe
+    note: singleton clusters return no hit
+    """
+    superfamily_dict = {}
+    for accession in accessions:
+        p1 = subprocess.run(f'elink -db cdd -target cdd -id {accession} -name cdd_cdd_superfamily_2 | efetch -format docsum | xtract -pattern DocumentSummary -element Accession',
+                      check = True,
+                      text = True,
+                      shell = True,
+                      capture_output = True)
+
+        for profile in p1.stdout.strip().split("\n"):
+            superfamily_dict.update({profile : accession})
+        
+    df = pd.DataFrame.from_dict(superfamily_dict, orient = 'index', columns = ['superfamily'])
+    df2 = df.reset_index().rename(columns = {'index' : 'profile'})
+    
+    return df2

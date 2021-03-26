@@ -669,14 +669,29 @@ def parse_hhr_output_fixedwidth(hhrfile, num_hits=10):
     #Path('tmp.hhr.table').unlink()
     return df3
 
-def parse_hhr_output(hhrfile, num_hits=10):
+def parse_hhr_output(hhrfile):
     """
     This function parses the horrible output of HHblits/HHpred (hhr format)
     
-    It returns a pandas dataframe of the top 10 hits, or the number defined by num_hits
+    It returns a pandas dataframe
     """
+    #initialize an empty dataframe
+    columns = [#'hitrank', 
+           'accession', 
+           'desc', 
+           'prob', 
+           'evalue', 
+           'pvalue', 
+           'score', 
+           'ss', 
+           'cols', 
+           'query_hmm', 
+           'template_hmm',
+           'template_length'
+          ]
+
+    df = pd.DataFrame(columns = columns)
     
-    df_list = []
     with open(hhrfile, encoding='utf-8', errors='ignore') as f:
         lines = f.readlines()
         query = lines[0].strip().split()[1]
@@ -706,7 +721,7 @@ def parse_hhr_output(hhrfile, num_hits=10):
                         desc = (hit_raw.split(maxsplit = 2)[2])
                         
                         #make a pandas dataframe
-                        d = {'hitrank' : hitrank,
+                        d = {#'hitrank' : hitrank,
                              'accession' : accession,
                              'desc': desc,
                              'prob' : prob2,
@@ -718,11 +733,9 @@ def parse_hhr_output(hhrfile, num_hits=10):
                              'query_hmm' : q_hmm,
                              'template_hmm' : t_hmm,
                              'template_length' : tlen}
-                        df = pd.DataFrame(data = d, index = [0])
-                        
-                        #add the df's to a list
-                        df_list.append(df)
-        
+                        #df = pd.DataFrame(data = d, index = [0])
+                        df = df.append(d, ignore_index = True)
+
                     #pass over the line if prob2 isn't  a float
                     except ValueError:
                         pass
@@ -731,37 +744,53 @@ def parse_hhr_output(hhrfile, num_hits=10):
             #and will raise an IndexError
             except IndexError:
                 break
+                
+    #I now have a dataframe with hits, or an empty dataframe
+    if not df.empty:
+        
+        #set a column containing the query name
+        df["query"] = query
+        df["file"] = Path(hhrfile).stem
+
+        #reorganize the columns, set dtypes
+        df = df[["file",
+                  "query",
+                  "accession",
+                  "desc",
+                  "prob",
+                  "evalue", 
+                  "pvalue", 
+                  "score", 
+                  "ss", 
+                  "cols", 
+                  "query_hmm", 
+                  "template_hmm", 
+                  "template_length"]].astype({"prob" : "float", 
+                                            "evalue" : "float",
+                                            "cols" : "float"})
+
+    return df
+
+def get_best_hhpred_hit(hhrfile, min_prob = 90, min_aln_length = 50):
+    """
+    Filters HHR output for hits > 90 prob and aln_length > 50
+    Selects the best non-PDB hit, if present
+    Otherwise, returns best PDB hit or empty dataframme
+    """
+    df = parse_hhr_output(hhrfile)
     
-    #Combine the results together
-    df2 = (pd.concat(df_list, ignore_index = True)
-             #.drop(columns = "hitrank")
-             #.reset_index()
-             #.drop(columns = 'index')
-          )
+    #filter the hits
+    df2 = df.query('prob >= @min_prob and cols >= @min_aln_length')
     
-    #set a column containing the query name
-    df2["query"] = query
-    df2["file"] = Path(hhrfile).stem
+    #get the best non PDB hit
+    df3 = df2.query('~accession.str.contains("_")').head(1)
+
+    #if only pdb hits
+    if df3.empty:
+        df3 = df2.head(1)
     
-    #reorganize the columns
-    df3 = df2[["file",
-              "query",
-              "accession",
-              "desc",
-              "prob",
-              "evalue", 
-              "pvalue", 
-              "score", 
-              "ss", 
-              "cols", 
-              "query_hmm", 
-              "template_hmm", 
-              "template_length"]]
-    
-    #select only X number of hts
-    df4 = df3.query('index <= @num_hits')
-    
-    return df4
+    #if no hits pass the criteria, this is an empty dataframe
+    return df3
 
 
 def add_pdb_metadata_to_hhr_df(hhr_df):
