@@ -120,3 +120,9 @@ df_hist = df["counts"].value_counts().sort_index().to_frame().reset_index()
 df_hist.rename(columns = {'index' : 'bins'}, inplace = True)
 df_hist["bins"] = df_hist["bins"].astype('str')
 ```
+
+**Get the most common value of a group**
+The trick is that you have to use a lambda function to get the mode, because there may be multiple values, so this function just gets the first
+```
+df["top_cluster"] = df.groupby('tnsb_node')['cluster'].transform(lambda x: x.mode()[0])
+```
