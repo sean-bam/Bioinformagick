@@ -126,3 +126,9 @@ The trick is that you have to use a lambda function to get the mode, because the
 ```
 df["top_cluster"] = df.groupby('tnsb_node')['cluster'].transform(lambda x: x.mode()[0])
 ```
+
+**Remove duplicate columns based on the columns 'protein' and 'profile', but ignoring Na's in 'protein'
+[link](https://stackoverflow.com/questions/50154835/drop-duplicates-but-ignore-nulls)
+```
+df = df[(~df[['protein', 'profile']].duplicated()) | df['protein'].isna()]
+```
