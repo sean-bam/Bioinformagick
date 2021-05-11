@@ -127,8 +127,25 @@ The trick is that you have to use a lambda function to get the mode, because the
 df["top_cluster"] = df.groupby('tnsb_node')['cluster'].transform(lambda x: x.mode()[0])
 ```
 
-**Remove duplicate columns based on the columns 'protein' and 'profile', but ignoring Na's in 'protein'
+**Remove duplicate columns based on the columns 'protein' and 'profile', but ignoring Na's in 'protein'**
 [link](https://stackoverflow.com/questions/50154835/drop-duplicates-but-ignore-nulls)
 ```
 df = df[(~df[['protein', 'profile']].duplicated()) | df['protein'].isna()]
+```
+
+**Create a dataframe from a for loop**
+Iteratively adding things to a dataframe is slower than creating a list/dictionary, then creating a dataframe from that. 
+Here is one example:
+```
+data = []
+    with open(islandfile) as f:
+        for line in f:
+            if line.startswith("==="):
+                drop1, accession, num_features, assembly, accession2, other = line.strip().split(maxsplit = 5)
+                data.append({"accession" : accession,
+                             "num_features" : num_features,
+                             "assembly" : assembly,
+                             "accession2" : accession2,
+                             "other" : other})
+df = pd.DataFrame.from_records(data)
 ```
