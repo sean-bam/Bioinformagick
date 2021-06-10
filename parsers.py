@@ -339,6 +339,164 @@ def prodigal_gff2df(gff):
                    )
     
     return df2
+
+def df2gff(df, output):
+    """
+    takes a dataframe with the following columns:
+    "accession", "type", "start", "stop", "strand", "id", "product"
+    strand can be +/- or 1/-1. Otherwise, set to ".".
+    
+    prints a table with gff columns
+    1. seqid
+    2. source
+    3. type
+    4. start
+    5. stop
+    6. score
+    7. strand
+    8. phase
+    9. attributes
+    """
+    
+    df = (df.loc[:,["accession",
+                    "type",
+                   "start",
+                   "stop",
+                   "strand",
+                   "id",
+                   "product"
+                  ]
+               ]
+            .reset_index(drop = True)
+            .astype({"start" : "int64",
+                   "stop" : "int64",
+                     "strand" : "str"
+                  }
+                   )
+         )
+    
+    #fix the strand columns
+    df['strand'] = df.strand.replace("1", "+")
+    df['strand'] = df.strand.replace("+1", "+")
+    df["strand"] = df.strand.replace("-1", "-")
+    df["strand"] = df.strand.replace("nan", ".")
+    
+    #fill empty "products" and remove any comma's
+    #to be compatible with GFF file format specs
+    df["product"] = df["product"].fillna(".")
+    df["product"] = df["product"].str.replace(",", "+")
+    
+    #make the gff columns
+    df["source"] = "DB"
+    df["score"] = "."
+    df["phase"] = 0
+    df["attributes"] = "ID=" + df["id"] + ";" + "Name=" + df["product"]
+    
+    #rearrange the columns
+    df = df.loc[:, ["accession",
+                    "source",
+                    "type",
+                    "start",
+                    "stop",
+                    "score",
+                    "strand",
+                    "phase",
+                    "attributes"
+                   ]
+               ]
+    
+    
+    #print the output
+    df.to_csv(output, header = False, index = False, sep = '\t')
+    #return df
+
+def df2gbk(df, output, flip=False):
+    """
+    takes a dataframe with the following columns:
+    "accession", "length", "start", "stop", "strand", "type", "product"
+    strand can be +/- or 1/-1. Otherwise, set to None.
+    """
+
+    df = (df.loc[:,["accession", 
+                   "length",
+                   "start",
+                   "stop",
+                   "strand",
+                   "type",
+                   "product"
+                  ]
+               ]
+            .reset_index(drop = True)
+            .astype({"start" : "int64",
+                   "stop" : "int64",
+                     "strand" : "str"
+                  }
+                   )
+         )
+    
+    #fix the strand columns
+    df['strand'] = df.strand.replace("+", "+1")
+    df['strand'] = df.strand.replace("1", "+1")
+    df["strand"] = df.strand.replace("-", "-1")
+    
+    #fill empty "products"
+    df["product"] = df["product"].fillna("hypothetical")
+    
+    accession = df.at[0,"accession"]
+    length = df.at[0,"length"]
+    
+    #initilize a seq record
+    unk_dna = UnknownSeq(length, character="N")
+    my_sequence_record = SeqRecord(unk_dna, id = accession)
+    my_sequence_record.annotations["molecule_type"] = "DNA"
+
+    #add annotations
+    flip = False
+    for index, row in df.iterrows():
+        start = row[2]
+        stop = row[3]
+        strand = row[4]
+        feature_type = row[5]
+        product = row[6]
+        
+        #this is the only way I deal with strand apprpriately,
+        #after spending way too much time on this
+        if strand == "+1" or strand == "-1":
+            strand = int(strand)
+        else:
+            strand = None
+        
+        #make all non-CDS features "CDS" features, fow now
+        if feature_type != "CDS":
+            feature_type = "CDS"
+            
+        #put in a Gene
+        my_feature = SeqFeature(FeatureLocation(start, stop), 
+                                type="gene", 
+                                strand=strand,
+                                qualifiers = {"locus_tag" : product}
+                               )
+        my_sequence_record.features.append(my_feature)
+        
+        #put in the feautres
+        my_feature = SeqFeature(FeatureLocation(start, stop), 
+                                type=feature_type, 
+                                strand=strand,
+                                qualifiers = {"product" : product,
+                                              "codon_start" : 1,
+                                              }
+                               )
+        print(my_feature.translate(cds=True))
+        my_sequence_record.features.append(my_feature)
+        
+    if flip:
+        #reverse complement, keeping the ID's the same
+        my_sequence_record.reverse_complement(id=True,
+                                             name=True,
+                                             description=True,
+                                             annotations=True)
+    #eqIO.write(my_sequence_record, output, "genbank")
+    return my_sequence_record
                         
 def vcontact2cytoscape(vcontact_input, output):
     """
@@ -533,8 +691,8 @@ def blast_outfmt6csv_to_df(outfmt6_csv):
 
 def blast_outfmt6_to_df(blastoutfmt6):
     df = pd.read_csv(blastoutfmt6,
-                 names=['query',
-                        'subject',
+                 names=['qaccver',
+                        'saccver',
                         'pident', 
                         'length',
                         'mismatch',
@@ -1122,3 +1280,32 @@ def entrez_2_island(accession_list, output_dir, chr_start=0, chr_stop=100000000)
     
     #remove the feature table
     Path('tmp_feature_table.ft').unlink()
+    
+def island2df(islandfile):
+    """
+    Basic function to parse island-formatted files into a dataframe
+    """
+    data = []
+    with open(islandfile) as f:
+        for line in f:
+            if line.startswith("==="):
+                drop1, accession, num_features, assembly, accession2, other = line.strip().split(maxsplit = 5)
+            else:
+                orf, coords, strand, assembly, acccession3, gene_id, annotation, annotation2, other1 = line.strip().split(maxsplit = 8)
+                start, stop = coords.split("..")
+                
+                data.append({"accession" : accession,
+                                 "num_features" : num_features,
+                                 "assembly" : assembly,
+                                 "accession2" : accession2,
+                                 "other" : other,
+                                 "orf" : orf,
+                                 "start" : start,
+                                 "stop" : stop,
+                                 "strand" : strand,
+                                 "annotation" : annotation,
+                                 "annotation2" : annotation2})
+                
+        df = pd.DataFrame.from_records(data)
+                
+        return df
