@@ -149,3 +149,8 @@ data = []
                              "other" : other})
 df = pd.DataFrame.from_records(data)
 ```
+
+**Select rows where there is at least one element in the specified column(s)**
+```
+df.loc[df.loc[:, ["protein_id", "locus_tag", "product"]].any(axis='columns')]
+```
