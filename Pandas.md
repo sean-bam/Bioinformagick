@@ -1,7 +1,17 @@
 **Set a new column based on a `query` result:**
 >df.loc[df.query('ColumnA > 3').index, "new_column"] = "Triplet"
 
-**Update a column based on multiple conditions using `mask` or `where`.**
+**update a column using `where` or 'mask'**
+```
+#Change all values in the 'icity' column that are greater than 1 to 1
+df["icity"] = df.where(df.icity <1, 1).icity
+
+#the same, but using mask
+df.mask(df.icity >1)
+df["icity"] = df.mask(df.icity >1, 1).icity
+```
+
+**Update a column based on multiple conditions using `mask`**
 Note: Use `&` instead of `and`.
 ```
 #Make boolean criteria
@@ -148,4 +158,9 @@ data = []
                              "accession2" : accession2,
                              "other" : other})
 df = pd.DataFrame.from_records(data)
+```
+
+**Select rows where there is at least one element in the specified column(s)**
+```
+df.loc[df.loc[:, ["protein_id", "locus_tag", "product"]].any(axis='columns')]
 ```
