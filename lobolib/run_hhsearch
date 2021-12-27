@@ -1,0 +1,257 @@
+#!/usr/bin/perl5.16
+
+############################################################
+#	Template:	0.3, November 04 2004
+#	Parent Path:	/net/gloin/export/home/wolf/bin/???
+############################################################
+
+############################################################
+#	System etc
+############################################################
+$Pver = "0.6";
+$Pdat = "March 26 2019";
+
+($Pnam) = ($0 =~ m/([^\/]+)$/);
+($Path) = ($0 =~ m/^(.+)\/[^\/]+$/);$Path = "." unless($Path);
+
+$Ppid = $$;	# Process ID
+my $Base = "tmp.$Pnam.$Ppid";
+{
+ my ($host) = ($ENV{"HOSTNAME"} =~ m/^(\w+)/);
+ my $salt = sprintf ".%s.%03d",$host,int(rand(1000));
+ $Base .= $salt;
+}
+############################################################
+#	Definitions
+############################################################
+$hhmake = "/home/wolf/bin/hhmake";
+$hhsearch = "/home/wolf/bin/hhsearch";
+$dbcal = "/home/wolf/soft/HHsearch/cal.hhm";
+$dbsea = "";
+$dout = ".";
+$name = "";
+$verbose = 0;
+$calibrate = 0;
+$prepare = 0;
+$dosearch = 1;
+$onfarm = 0;
+$optloc = "-loc";
+$fasta = 0;
+$optid = 99;
+$optco = 0.4999;
+$optnn = 10;
+
+############################################################
+#	Global variables
+############################################################
+@lstf = ();
+@lstn = ();
+
+############################################################
+#	Instructions etc
+############################################################
+$Instructions = <<EOINPUT;
+
+$Path/$Pnam $Pver, $Pdat
+
+Use: $Pnam filelist [options]
+
+Gets list of alignments in seqrows format; makes a database,
+runs all against all.
+
+Options:
+
+	-d=dir		work directory (default $dout)
+
+	-n=name		save/use name.*
+
+	-z=n		report n hits (default $optnn)
+
+	-db=hhmfile	run searches against hhmfile instead of self
+
+	-fasta		input alignments in FASTA format
+
+	-glob		global
+
+	-pre		prepare HMM database
+
+	-cal		run calibration against Soeding\'s database
+			($dbcal)
+
+	-nos		do not search
+
+	-sge		submit to SGE
+
+	-v		verbose
+
+	-hhm=program	hhmake (default $hhmake)
+
+	-hhs=program	hhsearch (default $hhsearch)
+
+Requirements:
+
+	$hhmake, $hhsearch, Wolf\'s scripts on path
+EOINPUT
+
+############################################################
+#	code start
+############################################################
+
+#---	get and process arguments --------------------------
+my_args(@ARGV);
+-t STDIN and !@myGlobList and print $Instructions and exit 0;
+push @myGlobList,"-" unless(-t STDIN);
+
+#$namesco = $myOptList{"s"} if($myOptList{"s"} ne "");
+#$nameout = $myOptList{"o"} if($myOptList{"o"} ne "");
+$name = $myOptList{"n"} if($myOptList{"n"} ne "");
+$dout = $myOptList{"d"} if($myOptList{"d"} ne "");
+$dbsea = $myOptList{"db"} if($myOptList{"db"} ne "");
+$optnn = int $myOptList{"z"} if(int $myOptList{"z"}>0);
+$verbose = 1 if(exists $myOptList{"v"});
+$prepare = 1 if(exists $myOptList{"pre"});
+$calibrate = 1 if(exists $myOptList{"cal"});
+$dosearch = 0 if(exists $myOptList{"nos"});
+$onfarm = 1 if(exists $myOptList{"sge"});
+$fasta = 1 if(exists $myOptList{"fasta"});
+$optloc = "-glob"  if(exists $myOptList{"glob"});
+$hhmake = $myOptList{"hhm"} if($myOptList{"hhm"} ne "");
+$hhsearch = $myOptList{"hhs"} if($myOptList{"hhs"} ne "");
+
+my $flst = shift @myGlobList;
+
+$name = $Base if($name eq "");
+
+#---	read alignment files -------------------------------
+print STDERR "Reading $flst\n";
+open HAND,"<$flst" or die "Can't read \"$flst\"";
+while(<HAND>){
+ chomp;
+ my ($fnam) = m/^\s*(\S+)/;
+ next if($fnam eq "");
+ push @lstf,$fnam; 
+ my $anam = $fnam;
+ $anam =~ s/^.*\///; $anam =~ s/\.[^.]*$//;
+ push @lstn,$anam;
+}
+close HAND;
+printf STDERR "\t%d alignments\n",(scalar @lstn);
+
+#---	begin prepare --------------------------------------
+if($prepare){
+#---	prepare HMM commands -------------------------------
+ open HANX,">$Base.1.run.txt" or die "Can't read \"$Base.1.run.txt\"";
+ for(my $i=1;$i<=@lstn;$i++){
+  my $ff = $lstf[$i-1];
+  my $nn = $lstn[$i-1];
+  unlink <$dout/$name.$nn.hhm>;
+  $CMD = "sr_filter -conplus -hocut=0 -hcon=0 -gcon= $optco -ncon= \"$nn\" | sr2fa > $dout/$Base.$nn.fa";
+  if($fasta==0){ $CMD = "cat $ff | ".$CMD;}
+  else{ $CMD = "fa2sr $ff -w=0 | ".$CMD;}
+  $CMD .= " ; $hhmake -i $dout/$Base.$nn.fa -o $dout/$name.$nn.hhm -id $optid -M first -name \"$nn\" > /dev/null";
+  if($calibrate){
+   $CMD .= " ; $hhsearch -d $dbcal -i $dout/$name.$nn.hhm -o /dev/null -id $optid -M first $optloc -norealign -nocons -cal > /dev/null";
+  }
+  $CMD .= " ; rm $dout/$Base.$nn.fa";
+  print HANX "$CMD\n";
+ }
+ close HANX;
+
+#---	run HMM commands -----------------------------------
+ if($onfarm and (@lstn>=1500 or ($calibrate and @lstn>=100))){
+  $CMD = "submitSGEfarm $Base.1.run.txt -bt=-2 -rand -work=2 > /dev/null";
+ }else{
+  $CMD = "chmod a+x $Base.1.run.txt ; ./$Base.1.run.txt";
+ }
+ print STDERR "$Pnam:\t[ $CMD ]\n" if($verbose); system $CMD;
+
+#---	prepare combined database --------------------------
+ unlink <$dout/$name.all.hhm>;
+ for(my $i=1;$i<=@lstn;$i++){
+  my $nn = $lstn[$i-1];
+  $CMD = "cat $dout/$name.$nn.hhm >> $dout/$name.all.hhm"; print STDERR "$Pnam:\t[ $CMD ]\n" if($verbose); system $CMD;
+ }
+#---	end begin ------------------------------------------
+}
+
+#---	run search -----------------------------------------
+if($dosearch){
+ 
+#---	prepare search commands ----------------------------
+ $dbsea = "$dout/$name.all.hhm" if($dbsea eq "");
+ open HANX,">$Base.2.run.txt" or die "Can't read \"$Base.2.run.txt\"";
+ for(my $i=1;$i<=@lstf;$i++){
+  my $nn = $lstn[$i-1];
+  unlink <$dout/$name.$nn.out>;
+  $CMD = "$hhsearch -d $dbsea -i $dout/$name.$nn.hhm -o $dout/$name.$nn.out -z $optnn -id $optid -M $optco $optloc -norealign -nocons > $dout/$Base.$nn.tmp";
+  print HANX "$CMD\n";
+ }
+ close HANX;
+
+#---	run search commands --------------------------------
+ if($onfarm and @lstn>=100){
+  $CMD = "submitSGEfarm $Base.2.run.txt -bt=-2 -rand -work=2 > /dev/null";
+ }else{
+  $CMD = "chmod a+x $Base.2.run.txt ; ./$Base.2.run.txt";
+ }
+ print STDERR "$Pnam:\t[ $CMD ]\n" if($verbose); system $CMD;
+
+#---	print combined output ------------------------------
+ for(my $i=1;$i<=@lstn;$i++){
+  my $nn = $lstn[$i-1];
+  #$CMD = "cat $dout/$Base.$nn.tmp"; print STDERR "$Pnam:\t[ $CMD ]\n" if($verbose); system $CMD;
+  $CMD = "cat $dout/$name.$nn.out"; print STDERR "$Pnam:\t[ $CMD ]\n" if($verbose); system $CMD;
+ }
+#---	end run --------------------------------------------
+}
+
+#---	clean ----------------------------------------------
+unlink <$Base.*>;
+unlink <$dout/$Base.*>;
+
+############################################################
+#	max min
+############################################################
+sub max
+{
+ my $max = shift;
+ while(@_){
+  my $x = shift;
+  $max = $x if($x>$max);
+ }
+ return $max;
+}
+
+sub min
+{
+ my $min = shift;
+ while(@_){
+  my $x = shift;
+  $min = $x if($x<$min);
+ }
+ return $min;
+}
+
+
+############################################################
+#	my_args
+############################################################
+sub my_args
+{
+ my $nop = scalar @_;
+ for($i=0;$i<$nop;$i++){
+  if($_[$i]=~m/^-[^=]+=$/){
+   my $new = $_[$i].$_[$i+1];
+   splice @_,$i,2,$new;
+  }
+ }
+ foreach my $arg (@_){
+  my ($opt) = ($arg =~ m/^-(\w+)/);
+  my ($val) = ($arg =~ m/^-\w+=(.*)/);
+  if($opt){
+   $myOptList{$opt} = $val;
+  }else{
+   push @myGlobList,$arg;
+  }
+ }
+}
