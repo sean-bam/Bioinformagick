@@ -2,6 +2,7 @@ import parsers
 import pandas as pd
 from pathlib import Path
 import subprocess
+import shutil
 
 def get_seqs_from_blastdb(accession, blastdb, output, split = False, batch = False):
     """
@@ -153,20 +154,57 @@ def entrez_protein_to_taxonomy(protein_accession_list, output):
               "Family", 
               "Subfamily", 
               "Genus",
-              sep = ",",
+              sep = "~",
               file = f)
         
         for accession in protein_accession_list:
-            p1 = subprocess.run(f'elink -db protein -target taxonomy -name protein_taxonomy -id {accession} | efetch -format xml | xtract -pattern Taxon -tab "," -first TaxId ScientificName -group Taxon -KING "(-)" -PHYL "(-)" -CLSS "(-)" -ORDR "(-)" -FMLY "(-)" -SFMLY "(-)" -GNUS "(-)" -block "*/Taxon" -match "Rank:kingdom" -KING ScientificName -block "*/Taxon" -match "Rank:phylum" -PHYL ScientificName -block "*/Taxon" -match "Rank:class" -CLSS ScientificName -block "*/Taxon" -match "Rank:order" -ORDR ScientificName -block "*/Taxon" -match "Rank:family" -FMLY ScientificName -block "*/Taxon" -match "Rank:subfamily" -SFMLY ScientificName -block "*/Taxon" -match "Rank:genus" -GNUS ScientificName -group Taxon -tab "," -element "&KING" "&PHYL" "&CLSS" "&ORDR" "&FMLY" "&SFMLY" "&GNUS"',
+            p1 = subprocess.run(f'elink -db protein -target taxonomy -name protein_taxonomy -id {accession} | efetch -format xml | xtract -pattern Taxon -tab "~" -first TaxId ScientificName -group Taxon -KING "(-)" -PHYL "(-)" -CLSS "(-)" -ORDR "(-)" -FMLY "(-)" -SFMLY "(-)" -GNUS "(-)" -block "*/Taxon" -match "Rank:kingdom" -KING ScientificName -block "*/Taxon" -match "Rank:phylum" -PHYL ScientificName -block "*/Taxon" -match "Rank:class" -CLSS ScientificName -block "*/Taxon" -match "Rank:order" -ORDR ScientificName -block "*/Taxon" -match "Rank:family" -FMLY ScientificName -block "*/Taxon" -match "Rank:subfamily" -SFMLY ScientificName -block "*/Taxon" -match "Rank:genus" -GNUS ScientificName -group Taxon -tab "~" -element "&KING" "&PHYL" "&CLSS" "&ORDR" "&FMLY" "&SFMLY" "&GNUS"',
                                shell = True,
                                 text = True,
                                 capture_output = True,
                                check = True)
             print(accession, 
                   p1.stdout, 
-                  sep = ",", 
+                  sep = "~", 
                   #end = '', 
                   file = f)
+
+def entrez_assembly_to_taxonomy(assembly_accession_list, output):
+    """
+    This function expects a list of protein accession and returns 10 columns of:
+    ProteinID,TaxID,ScientificName,Kingdom,Phylum,Class,Order,Family,Subfamily,Genus
+    """
+    assert type(assembly_accession_list) == list or type(protein_accession_list) == set, f"{protein_accession_list} is not a list/set"
+    assert len(assembly_accession_list) > 0, f"{assembly_accession_list} is empty!"
+    
+    if not Path(output).parent.is_dir():
+        Path(output).parent.mkdir(parents = True)
+    
+    with open(output, 'w') as f:
+        print(f"Accession", 
+              "TaxID", 
+              "ScientificName", 
+              "Kingdom", 
+              "Phylum", 
+              "Class", 
+              "Order", 
+              "Family", 
+              "Subfamily", 
+              "Genus",
+              sep = "~",
+              file = f)
+        
+        for accession in assembly_accession_list:
+            p1 = subprocess.run(f'elink -db assembly -target taxonomy -name assembly_taxonomy -id {accession} | efetch -format xml | xtract -pattern Taxon -tab "~" -first TaxId ScientificName -group Taxon -KING "(-)" -PHYL "(-)" -CLSS "(-)" -ORDR "(-)" -FMLY "(-)" -SFMLY "(-)" -GNUS "(-)" -block "*/Taxon" -match "Rank:kingdom" -KING ScientificName -block "*/Taxon" -match "Rank:phylum" -PHYL ScientificName -block "*/Taxon" -match "Rank:class" -CLSS ScientificName -block "*/Taxon" -match "Rank:order" -ORDR ScientificName -block "*/Taxon" -match "Rank:family" -FMLY ScientificName -block "*/Taxon" -match "Rank:subfamily" -SFMLY ScientificName -block "*/Taxon" -match "Rank:genus" -GNUS ScientificName -group Taxon -tab "~" -element "&KING" "&PHYL" "&CLSS" "&ORDR" "&FMLY" "&SFMLY" "&GNUS"',
+                               shell = True,
+                                text = True,
+                                capture_output = True,
+                               check = True)
+            print(accession, 
+                  p1.stdout, 
+                  sep = "~", 
+                  #end = '', 
+                  file = f)            
             
 def entrez_nuccore_to_taxonomy(accession_list, output):
     """
@@ -183,6 +221,7 @@ def entrez_nuccore_to_taxonomy(accession_list, output):
      so its harder to parse
      -I can't parallelize this on the command line with 'join-into-groups-of', 
      because the links between the query and result get broken.
+     -I Use "~" as a delimter, b/c some idiots use "," in the names of their species
     """
     assert type(accession_list) == list or type(accession_list) == set, f"{accession_list} is not a list/set"
     assert len(accession_list) > 0, f"{accession_list} is empty!"
@@ -431,3 +470,40 @@ def entrez_cdd_superfamily_to_members(accessions):
     df2 = df.reset_index().rename(columns = {'index' : 'profile'})
     
     return df2
+
+def run_yuris_cls2ali(clusterfile, db='nr', output='clusters/cls'):
+    
+    """
+    Runs Yuri's 'Cls2ali' script on the SGE farm
+    -a is set so individual files are output
+    -sing is set so singletons are output
+    -sge is set so it runs on the farm (but can't edit -snore, so it takes 5 mins)
+    """
+    
+    output = Path(output)
+    
+    if not output.parent.exists():
+        output.parent.mkdir(parents = True)
+    
+    subprocess.run(f'cls2ali {clusterfile} -d={db} -a={output} -sing -sge',
+                   shell = True,
+                   check = True
+                  )
+    
+def split_file(file, n=100, prefix='tmp'):
+    "DEPRECATED"
+    "splits a file into n chunks with the prefix 'tmp' and numeric suffixes (-d)"
+    
+    subprocess.run(f'split -d -l {n} {file} {prefix}',
+                   check = True,
+                   shell = True,
+                  )
+    
+def concatenate_files(file_list, output):
+    
+    output = Path(output)
+    
+    with output.open('wb') as wfd:
+        for infile in file_list:
+            with open(infile, 'rb') as fd:
+                shutil.copyfileobj(fd, wfd)

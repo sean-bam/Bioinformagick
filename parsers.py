@@ -322,17 +322,17 @@ def prodigal_gff2df(gff):
                 pass
             else:
                 contig, prodigal_version, CDS, start, stop, confidence, strand, number, info = line.split()
-                data.append([contig, contig_length, start, stop, strand])
+                data.append([contig, start, stop, strand])
                 
     df = pd.DataFrame(data, columns=['contig', 
-                                     'contig_length', 
+                                     #'contig_length', 
                                      'start', 
                                      'stop', 
                                      'strand'
                                     ]
                      )
     
-    df2 = df.astype({'contig_length' : 'int64', 
+    df2 = df.astype({#'contig_length' : 'int64', 
                      'start' : 'int64', 
                      'stop' : 'int64'
                     }
@@ -1061,16 +1061,16 @@ def parse_yuris_run_mmclust_to_df(run_mmclust_output, cluster_name='cls_'):
     df["cluster_size"] = df.groupby('representative')['representative'].transform('count')
     
     #Name each cluster
-    grouped = df.groupby('representative')
-    i=1
-    df_list = []
-    for name, group in grouped:
-        group["cluster_name"] = str(cluster_name) + str(i)
-        df_list.append(group)
-        i += 1
-    df2 = pd.concat(df_list)
+    #grouped = df.groupby('representative')
+    #i=1
+    #df_list = []
+    #for name, group in grouped:
+    #    group["cluster_name"] = str(cluster_name) + str(i)
+    #    df_list.append(group)
+    #    i += 1
+    #df2 = pd.concat(df_list)
     
-    return df2
+    return df
 
 def parse_yuris_prof_align_to_df(prof_align_cls):
     """
@@ -1309,3 +1309,76 @@ def island2df(islandfile):
         df = pd.DataFrame.from_records(data)
                 
         return df
+    
+def parse_hmmer_tblout(hmmsearch_tblout):
+    """
+    Converts the --tblout output of hmmsearch into a dataframe
+    """
+    
+    names = ["target_name",
+         "t_accession",
+         "query_name",
+         "q_accession",
+         "e-value",
+         "score",
+         "bias",
+         "dom_E-value",
+         "dom_score",
+         "dom_bias",
+         "exp",
+         "reg",
+         "clu",
+         "ov",
+         "env",
+         "dom",
+         "rep",
+         "inc",
+         "t_description"]
+
+    df = pd.read_csv(hmmsearch_tblout, 
+                    delim_whitespace = True, 
+                    comment = "#",
+                    names = names
+                   )
+    return df
+
+def parse_hmmer_domtblout(hmmsearch_tblout):
+    """
+    Converts the --tblout output of hmmsearch into a dataframe
+    """
+    
+    names = ["target_name",
+             "t_accession",
+             "t_len",
+             "query_name",
+             "q_accession",
+             "q_len",
+             "e-value",
+             "score",
+             "bias",
+             "dom_num",
+             "dom_count",
+             "c-e_value",
+             "i-e_value",
+             "dom_score",
+             "dom_bias",
+             "hmm_from",
+             "hmm_to",
+             "ali_from",
+             "ali_to",
+             "env_from",
+             "env_to",
+             "acc",
+             "t_description"]
+
+    df = pd.read_csv(hmmsearch_tblout, 
+                    delim_whitespace = True, 
+                    comment = "#",
+                    names = names
+                   )
+    
+    #calculate query/subject coverages
+    df["t_cov"] = (df["env_to"] - df["env_from"]) / df["t_len"]
+    df["q_cov"] = (df["hmm_to"] - df["hmm_from"]) / df["q_len"]
+    
+    return df
