@@ -1,5 +1,16 @@
 **Set a new column based on a `query` result:**
->df.loc[df.query('ColumnA > 3').index, "new_column"] = "Triplet"
+```
+df.loc[df.query('ColumnA > 3').index, "new_column"] = "Triplet"
+
+WARNING: This produces some unexpected behavior if you do something like:
+list_of_identifiers = ['abc', 'def']
+df.loc[df.query('ColumnA in @list_of_identifiers').index, "new_column"] = "Triplet"
+
+Sometimes, values that ARENT in list_of_identifiers are set
+
+So, if using a list, use mask/where approach described below
+```
+
 
 **update a column using `where` or 'mask'**
 ```
@@ -9,6 +20,11 @@ df["icity"] = df.where(df.icity <1, 1).icity
 #the same, but using mask
 df.mask(df.icity >1)
 df["icity"] = df.mask(df.icity >1, 1).icity
+
+#the same, but using a list
+list_of_identifiers = ['abc', 'def']
+df["icity"] = np.nan
+df["icity"] = df.mask(df.icity.isin(list_of_identifiers), "new_value").icity
 ```
 
 **Update a column based on multiple conditions using `mask`**
