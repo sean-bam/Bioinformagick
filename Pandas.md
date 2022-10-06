@@ -180,3 +180,8 @@ df = pd.DataFrame.from_records(data)
 ```
 df.loc[df.loc[:, ["protein_id", "locus_tag", "product"]].any(axis='columns')]
 ```
+
+**Convert two columns from a dataframe into a python dictionary**
+```
+my_dict = dict(df.loc[:,["keycolumn","valuecolumn"]].values)
+```
