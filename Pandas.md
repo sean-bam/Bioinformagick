@@ -45,6 +45,18 @@ df["Family"] = (df.mask(cond1 & (cond2 | cond3 | cond4) & cond5)
                                 .loc[:,"Family"])
 
 ```
+**Update 2+ columns based on a conditions using `mask`**
+For example, change a dataframe where some rows contain start > stop
+to start > stop
+```
+df[["start","stop"]] = (df.loc[:,["start","stop"]]          #select the columns to update
+                          .mask(df.start > df.stop,         #select rows where condition is true
+                                df[["stop","start"]],       #replace by swapping columns
+                                axis = 'index')
+                             )
+                         )
+```
+
 
 **Explode a cell into rows** ([Source](https://stackoverflow.com/questions/17116814/pandas-how-do-i-split-text-in-a-column-into-multiple-rows/21032532))
 ```
