@@ -60,3 +60,45 @@ fig.show()
 #fig.write_html('COG_pathway_heatmap.html', default_height = 800)
 #fig.write_image('../99figures/COG_pathway_heatmap2.svg',  height = 1200, width = 800)
 ````
+
+Scatter plots with shared xaxis
+```
+fig = make_subplots(rows=3, 
+                    cols=1,
+                    shared_xaxes = True
+                   )
+
+fig.add_trace(go.Scatter(x=df_params.resolution.tolist(),
+                         y=df_params.no_subcommunities.tolist()
+                        ), 
+              row=1, 
+              col=1)
+
+fig.add_trace(go.Scatter(x=df_params.resolution.tolist(), 
+                         y=df_params.community_size.tolist()
+                        ), 
+              row=2, 
+              col=1)
+
+fig.add_trace(go.Scatter(x=df_params.resolution.tolist(), 
+                         y=df_params.persistence.tolist()
+                        ), 
+              row=3, 
+              col=1)
+
+
+#this doesn't show in jupyter for some reason, but does show up in the SVG file
+fig.add_vline(x=140,
+             line_dash="dot")
+
+#update axes of plots
+fig.update_yaxes(title_text="# communities", row=1, col=1)
+fig.update_yaxes(title_text="Community size", row=2, col=1)
+fig.update_yaxes(title_text="Persistence", row=3, col=1)
+fig.update_xaxes(title_text="Resolution", row=4, col=1)
+
+#update figure size
+fig.update_layout(width=600, height=600, template= 'simple_white')
+#fig.show()
+fig.write_image('hidef_params.svg')
+```
