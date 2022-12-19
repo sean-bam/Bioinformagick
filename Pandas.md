@@ -197,3 +197,12 @@ df.loc[df.loc[:, ["protein_id", "locus_tag", "product"]].any(axis='columns')]
 ```
 my_dict = dict(df.loc[:,["keycolumn","valuecolumn"]].values)
 ```
+
+**remove spaces in column names**
+```
+columns = []
+for col in df.columns.tolist():
+    columns.append(col[1].replace(" ", "_"))
+df.columns = columns
+```
+
