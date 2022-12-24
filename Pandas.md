@@ -1,19 +1,25 @@
-**Set a new column based on a `query` result:**
-```
+layout: page
+title: "Pandas"
+permalink: /PANDAS
+
+## <a name='TOC'>Pandas</a>
+
+1. [Set a new column based on a `query` result](#newcolumnusingquery)
+2. [Update a column using `where` or `mask`](#updatecolumnusingwhere)
+3. [Update a column based on multiple conditions using `mask`](#Updateacolumnusingmultiple)
+4. [Update multiple columns using `mask`](#Update2cols)
+5. [Explode a cell into rows](#explode)
+
+
+**<a name="newcolumnusingquery">Set a new column based on a `query` result:</a>**
+
+```python
 df.loc[df.query('ColumnA > 3').index, "new_column"] = "Triplet"
-
-WARNING: This produces some unexpected behavior if you do something like:
-list_of_identifiers = ['abc', 'def']
-df.loc[df.query('ColumnA in @list_of_identifiers').index, "new_column"] = "Triplet"
-
-Sometimes, values that ARENT in list_of_identifiers are set
-
-So, if using a list, use mask/where approach described below
 ```
 
-
-**update a column using `where` or 'mask'**
-```
+**<a name="updatecolumnusingwhere">update a column using `where` or `mask`:</a>**
+```python
+import numpy as np
 #Change all values in the 'icity' column that are greater than 1 to 1
 df["icity"] = df.where(df.icity <1, 1).icity
 
@@ -27,7 +33,8 @@ df["icity"] = np.nan
 df["icity"] = df.mask(df.icity.isin(list_of_identifiers), "new_value").icity
 ```
 
-**Update a column based on multiple conditions using `mask`**
+**<a name="Updateacolumnusingmultiple">Update a column based on multiple conditions using `mask`</a>**
+
 Note: Use `&` instead of `and`.
 ```
 #Make boolean criteria
@@ -45,10 +52,10 @@ df["Family"] = (df.mask(cond1 & (cond2 | cond3 | cond4) & cond5)
                                 .loc[:,"Family"])
 
 ```
-**Update 2+ columns based on a conditions using `mask`**
-For example, change a dataframe where some rows contain start > stop
-to start > stop
-```
+<a name="Update2cols">**Update 2+ columns based on a conditions using `mask`</a>**
+
+For example, change a dataframe where some rows contain start > stop to start < stop
+```python
 df[["start","stop"]] = (df.loc[:,["start","stop"]]          #select the columns to update
                           .mask(df.start > df.stop,         #select rows where condition is true
                                 df[["stop","start"]],       #replace by swapping columns
@@ -58,8 +65,8 @@ df[["start","stop"]] = (df.loc[:,["start","stop"]]          #select the columns 
 ```
 
 
-**Explode a cell into rows** 
-```
+<a name="explode">**Explode a cell into rows**</a>
+```python
 df["profile"] = df.profile.str.split(",").tolist()
 df = df.explode('profile')
 ```
