@@ -1,3 +1,7 @@
+layout: page
+title: "GCP"
+permalink: /GCP
+
 **Delete files by date**
 ```
 from google.cloud import storage
