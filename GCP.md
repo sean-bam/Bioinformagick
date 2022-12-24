@@ -3,7 +3,7 @@ title: "GCP"
 permalink: /GCP
 
 **Delete files by date**
-```
+```python
 from google.cloud import storage
 from datetime import datetime, timezone
 
