@@ -6,7 +6,7 @@ Scripts for bioinformagicking
 1. [BASH](#bash)
 2. [Random Linux stuff](#Linux)
 3. [E-utilities](#E-utilities)
-
+4. [GCP](https://sean-bam.github.io/Bioinformagick/GCP)
 ...
 
 # <a name="bash">Bash</a>
