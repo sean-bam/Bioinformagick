@@ -2,7 +2,12 @@ layout: page
 title: "GCP"
 permalink: /GCP
 
-**Delete files by date**
+## <a name='TOC'>Google Cloud Platform</a>
+
+1. [Delete files by date](#Deletefilesbydate)
+
+
+**<a name="Deletefilesbydate">Delete files by date</a>**
 ```python
 from google.cloud import storage
 from datetime import datetime, timezone
