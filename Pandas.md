@@ -49,7 +49,7 @@ df["icity"] = df.mask(df.icity.isin(list_of_identifiers), "new_value").icity
 **<a name="Updateacolumnusingmultiple">Update a column based on multiple conditions using `mask`</a>**
 
 Note: Use `&` instead of `and`.
-```
+```python
 #Make boolean criteria
 cond1 = df.Genus == "-"
 cond2 = df.Family == "Siphoviridae"
