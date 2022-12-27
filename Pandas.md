@@ -1,5 +1,5 @@
 layout: page
-title: "Pandas"
+title: "PANDAS"
 permalink: /PANDAS
 
 ## <a name='TOC'>Pandas</a>
