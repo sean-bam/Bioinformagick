@@ -9,7 +9,20 @@ permalink: /PANDAS
 3. [Update a column based on multiple conditions using `mask`](#Updateacolumnusingmultiple)
 4. [Update multiple columns using `mask`](#Update2cols)
 5. [Explode a cell into rows](#explode)
-
+6. [Set a column with the count of elements in another column](#Countelementswithgroupby)
+7. [How to split-apply-combine](#SplitApplyCombine)
+8. [Update the values of one dataframe using another](#UseUpdate)
+9. [Select rows before/after a row of interest](#SelectBeforeAfter)
+10. [Set a new column using named aggregation](#UseNamedAggregation)
+11. [Remove reciprocal entries/duplicates](#RemoveReciprocal)
+12. [Get the first group in a `groupby` dataframe](#GetFirstGroup)
+13. [Bin continuous data and visualize with a histogram](#BinContinuous)
+14. [Get the mode of a `groupby` dataframe](#GetGroupMode)
+15. [Remove duplicates but ignore Na's](#RemoveDupsIgnoringNA)
+16. [Construct a dataframe using a `for` loop](#CreateDataframeFromForLoop)
+17. [Select rows with at least one non-Na in the given column(s)](#SelectRowsWithOneElement)
+18. [Convert a dataframe into a dictionary](#DataframeToDict)
+19. [Remove spaces in column names](#RemoveSpacesinColNames)
 
 **<a name="newcolumnusingquery">Set a new column based on a `query` result:</a>**
 
@@ -71,26 +84,30 @@ df["profile"] = df.profile.str.split(",").tolist()
 df = df.explode('profile')
 ```
 
-**Set a column with the count of elements in another column.**
-```
+<a name="Countelementswithgroupby">**Set a column with the count of elements in another column.**</a>
+
+Note: `groupby` drops the row if NaN. So, a second option is shown to deal with this
+```python
 #Option1
 df["size"] = (df.groupby(by = ['mash_cluster_rep'])['mash_cluster_rep']
                                 .transform('count')
                              )
                              
 #Option2
-df = (pd.read_csv('old/pevzner_candidate_phage_annotated.csv')
-        .fillna('None') #groupby drops the row if NaN (?)
-        .groupby(['Order','Family','Subfamily', 'Genus', "NodeID"])
+df = (pd.read_csv('path/to/csv')
+        .fillna('None') 
+        .groupby(['Family'])
         .size()
         .reset_index(name='Count')
       )
 ```
-**How to Split-Apply-Combine**
-```
+
+<a name="SplitApplyCombine">**How to Split-Apply-Combine**</a>
+```python
 #Define a function you want to apply to the group
 def calculate_length(group):
     group["length"] = group["end"] - group["start"]
+    return group
     
 #Split the dataframe by something, apply the function. The results are automatically applied to every group
 df2 = df.groupby('accession').apply(calculate_length)
@@ -99,19 +116,21 @@ df2 = df.groupby('accession').apply(calculate_length)
 df3 = df2.reset_index(drop = True)
 ```
 
-**Update values in columns of one dataframe using columns of another dataframe.** 
+<a name="UseUpdate">**Update values in columns of one dataframe using columns of another dataframe.**</a>
+
 Note: Only matching indexes+columns are updated! Use `df.set_index()` to change indexes
+
 Note: Duplicate indexes mess this up
 [Source](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.update.html)
-```
-df1.update(df)
+```python
+df2.update(df)
 ```
 
-**Select rows before and after a given row**
+<a name="SelectBeforeAfter">**Select rows before and after a given row**</a>
 [Source](https://stackoverflow.com/questions/48630060/select-n-rows-above-and-below-a-specific-row-in-pandas)
-```
+```python
 #Select rows of interest
-idxs = df.query('name == "Mn_catalase_like" or name == "Dps"').index
+idxs = df.query('name == "something" or name == "something_else"').index
 
 #Loop through the list, slice the dataframe using iloc and the target index, +/- 2 rows
 df_list = []
@@ -123,9 +142,9 @@ for idx in idxs:
 df2 = pd.concat(df_list)
 ```
 
-**Split a dataframe into groups, set a column with the results of a named aggregation**
-```
-grouped = df_psiblast4.groupby(['phage', 'contig'])
+<a name="UseNamedAggregation">**Split a dataframe into groups, set a column with the results of a named aggregation**</a>
+```python
+grouped = df.groupby(['contig'])
 
 #Make a column named "shared_orfs" that takes the column "protein_id" and calculates its size.
 df_shared = grouped.agg(shared_orfs=pd.NamedAgg(column='protein_id', 
@@ -136,49 +155,58 @@ df_shared = grouped.agg(shared_orfs=pd.NamedAgg(column='protein_id',
 df_shared2 = df_shared.reset_index()
 ```
 
-**Remove reciprocal entries**
-```
-df = df.loc[:,["qaccver", "q_ign", "subj_ign", "dist", "IR_dist"]]
-
-#create a column that joins Seq1 - Seq2 or Seq2 - Seq1 to Seq1Seq2
-df["pairs"] = df.apply(lambda row: ''.join(sorted([row["q_ign"], row["subj_ign"]])), axis = 1)
+<a name="RemoveReciprocal">**Remove reciprocal entries**</a>
+```python
+#create a column that joins Query : Subject or Subject : Query to QuerySubject
+df["pairs"] = df.apply(lambda row: ''.join(sorted([row["query"], row["subject"]])), axis = 1)
 
 #remove rows with no matching pair and sort the database
 df2 = df.drop_duplicates(subset = 'pairs').drop(columns = ['pairs'])
 ```
 
-**Get the first group in a groupby object**
-```
+<a name="GetFirstGroup">**Get the first group in a groupby object**</a>
+```python
 group = df.groupby('motif_name')
 df2 = group.get_group((list(group.groups)[0]))
 ```
 
-**Bin continuous data into custom bins**
-From [here](https://towardsdatascience.com/histograms-with-plotly-express-complete-guide-d483656c5ad7)
-```
+<a name="BinContinuous">**Bin continuous data into custom bins**</a>
+From [here](https://towardsdatascience.com/histograms-with-plotly-express-complete-guide-d483656c5ad7).
+Also shown is a way to visualize the results as a histogram
+```python
 bins = [0,25,50,75,100,1000,10000,100000]
-df['counts'] = pd.cut(df['dist_from_att'], bins=bins, include_lowest = True)
-df_hist = df["counts"].value_counts().sort_index().to_frame().reset_index()
+df['counts'] = pd.cut(
+                    df['dist_from_att'], 
+                    bins=bins, 
+                    include_lowest = True
+                    )
+df_hist = (df["counts"]
+            .value_counts()
+            .sort_index()
+            .to_frame()
+            .reset_index()
+            )
+            
 df_hist.rename(columns = {'index' : 'bins'}, inplace = True)
 df_hist["bins"] = df_hist["bins"].astype('str')
 ```
 
-**Get the most common value of a group**
+<a name="GetGroupMode">**Get the mode from a group**</a>
 The trick is that you have to use a lambda function to get the mode, because there may be multiple values, so this function just gets the first
-```
+```python
 df["top_cluster"] = df.groupby('tnsb_node')['cluster'].transform(lambda x: x.mode()[0])
 ```
 
-**Remove duplicate columns based on the columns 'protein' and 'profile', but ignoring Na's in 'protein'**
+<a name="RemoveDupsIgnoringNA">**Remove duplicate columns based on the columns 'protein' and 'profile', but ignoring Na's in 'protein'**</a>
 [link](https://stackoverflow.com/questions/50154835/drop-duplicates-but-ignore-nulls)
-```
+```python
 df = df[(~df[['protein', 'profile']].duplicated()) | df['protein'].isna()]
 ```
 
-**Create a dataframe from a for loop**
+<a name="CreateDataframeFromForLoop">**Create a dataframe from a for loop**</a>
 Iteratively adding things to a dataframe is slower than creating a list/dictionary, then creating a dataframe from that. 
 Here is one example:
-```
+```python
 data = []
     with open(islandfile) as f:
         for line in f:
@@ -188,22 +216,24 @@ data = []
                              "num_features" : num_features,
                              "assembly" : assembly,
                              "accession2" : accession2,
-                             "other" : other})
+                             "other" : other,
+                             }
+                           )
 df = pd.DataFrame.from_records(data)
 ```
 
-**Select rows where there is at least one element in the specified column(s)**
-```
+<a name="SelectRowsWithOneElement">**Select rows where there is at least one element in the specified column(s)**</a>
+```python
 df.loc[df.loc[:, ["protein_id", "locus_tag", "product"]].any(axis='columns')]
 ```
 
-**Convert two columns from a dataframe into a python dictionary**
-```
+<a name="DataframeToDict">**Convert two columns from a dataframe into a python dictionary**</a>
+```python
 my_dict = dict(df.loc[:,["keycolumn","valuecolumn"]].values)
 ```
 
-**remove spaces in column names**
-```
+<a name="RemoveSpacesinColNames">**remove spaces in column names**</a>
+```python
 columns = []
 for col in df.columns.tolist():
     columns.append(col[1].replace(" ", "_"))
