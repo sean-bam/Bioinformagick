@@ -5,10 +5,11 @@ permalink: /DataViz
 ## <a name='TOC'>Table of Contents</a>
 
 1. [Sort rows of a dataframe by UPGMA](#UPGMA)
-2. [Build a heatmap])(#Heatmap)
+2. [Build a heatmap](#Heatmap)
+3. [Scatter plots with shared axis](#ScatterShared)
 
 
-Sort rows of a dataframe by UPGMA.
+**<a name="UPGMA">Sort rows of a dataframe by UPGMA.</a>**
 
 Plotly has a thin-wrapper around SciPy's hierarchical clustering functions. The default is to use UPGMA. Using a dataframe of distances, we can run UPGMA clustering through plotly, and use the resulting leaf order to sort the dataframe.
 ```python
@@ -17,7 +18,7 @@ dendro_leaves = fig['layout']['xaxis']['ticktext']
 df2 = df.loc[dendro_leaves,:]
 ```
 
-Make a heatmap
+**<a name="Heatmap">Build a heatmap.</a>**
 ```python
 fig = go.Figure(data=go.Heatmap(
                     x=df.columns,
@@ -85,7 +86,7 @@ fig.update_layout(title_text = 'Figure title',
 #fig.write_image('path/to/svg',  height = 1200, width = 800)
 ````
 
-Scatter plots with shared xaxis
+**<a name="ScatterShared">Scatter plots with shared axis</a>**
 ```python
 fig = make_subplots(rows=3, 
                     cols=1,
