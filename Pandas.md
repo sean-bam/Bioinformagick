@@ -1,6 +1,6 @@
 layout: page
-title: "PANDAS"
-permalink: /PANDAS
+title: "Pandas"
+permalink: /Pandas
 
 ## <a name='TOC'>Pandas</a>
 
