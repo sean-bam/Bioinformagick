@@ -1,5 +1,5 @@
 # Bioinformagick
-Scripts for bioinformagicking
+Scripts and code snippets for bioinformagicking
 
 ## <a name='TOC'>Table of Contents</a>
 
@@ -9,3 +9,4 @@ Scripts for bioinformagicking
 4. [Data visualization](https://sean-bam.github.io/Bioinformagick/DataViz)
 5. [Containerization](https://sean-bam.github.io/Bioinformagick/Containerization)
 6. [Version control with Git](https://sean-bam.github.io/Bioinformagick/Git)
+7. [Stats](https://sean-bam.github.io/Bioinformagick/Stats)
