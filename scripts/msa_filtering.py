@@ -1,6 +1,32 @@
 """
 This program implements MSA filtering as described in 
 Esterman et al (2021) https://doi.org/10.1093/ve/veab015
+
+In summary:
+
+1. Calculate HH94 score of a seq in an MSA
+2. Calculate the Q score of an AA (x) in an MSA column as Qx = (HH94 score) * (blosum62 score for X against all AAs)
+ - For each position in the MSA, an aligned AA is given a frequency score that is incremented by the HH94 score of the sequence. If the position is a gap, all AAs are possible, so each AA frequency is incremented by their default frequency in swiss prot*HH94 score. What we are left with is a vector of 20 amino acids and their frequencies for each column, where the frequencies of aligned AAs are typically much higher than their background swiss prot frequency.
+3. The consensus AA for that position is the AA with the highest Qx score
+4. Calculate the expectation of the score of an MSA column against a randomly selected AA (R) as Qr = (vector of relative frequencies of AAs) * Qscore
+5. Calculate the homogeneity of an MSA column as H = (consensus - expectation) / (blosum score - expectation)
+6. Keep/discard consensus AA, depending on threshold
+
+In other words:
+
+Basically, the "best" amino acid is the one with the highest score (BLOSUM62 against the alignment column), calculated with sequence weights. Homogeneity prorates this score between the maximum (strictly homogeneous) and the non-pathological minimum (random assortment of amino acids). Consensus amino acid is registered when the homogeneity is above the threshold, otherwise it's set to "X".
+
+Some more background:
+
+All of this involves sequence weighting. Sequence weighting is typically performed in MSAs to downweight highly redundant sequences and upweight diverse sequences. There are tree-based and distance-based weighting schemes. According to Henikoff & Henikoff 1994 paper, for both schemes:
+
+"the weight assigned to a sequence is a measure of the distance between the sequence and a root or generalized sequence. Each distance is based on the entire sequence in question. However, the seq weight are typically applied to PSSMs in which each position is considered independently".
+
+Or, according to https://doi.org/10.1186/s12859-021-04183-8:
+"the score of a sequence is the average of the scores of each position of the sequence, the score of a position being 1/rd, with r the number of different characters at the considered alignment column and d the number of times the character of the considered sequence and position appears in the considered alignment column. The idea of this weighting scheme is to give equal weight to all characters observed at one alignment column, dividing this weight equally among those sequences sharing that character at that position."
+
+What they fail to mention from the Henikoff paper is the part about the consensus:
+"for every position of the alignment, the PSSM entry for each residue was the sequence- weighted observed frequency of that residue divided by its expected frequency tabulated from SWISS-PROT".
 """
 
 # Imports --------------------------------------------------------------------------------------------------
