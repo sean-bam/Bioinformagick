@@ -8,3 +8,4 @@ Scripts for bioinformagicking
 3. [Pandas](https://sean-bam.github.io/Bioinformagick/Pandas)
 4. [Data visualization](https://sean-bam.github.io/Bioinformagick/DataViz)
 5. [Containerization](https://sean-bam.github.io/Bioinformagick/Containerization)
+6. [Version control with Git](https://sean-bam.github.io/Bioinformagick/Git)
