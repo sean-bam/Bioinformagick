@@ -141,6 +141,21 @@ for idx in idxs:
 #combine the results into a single dataframe
 df2 = pd.concat(df_list)
 ```
+Option 2:
+```python
+#assuming the dataframe has a column "seed" that is set to True
+#get 3 rows around these rows
+
+def get_minimum_from_seed(group):
+  all_indexes = group.index
+  seed_indexes = group.query('seed = True').index
+  group["dist_from_seed"] = [minimum(index, seed_indexes) for index in all_indexes)
+  
+  return group
+
+df2 = df.groupby('contig').apply(get_minimum_from_seed)
+df3 = df2.query('dist_from_seed < 3')
+```
 
 <a name="UseNamedAggregation">**Split a dataframe into groups, set a column with the results of a named aggregation**</a>
 ```python
